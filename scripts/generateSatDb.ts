@@ -29,6 +29,12 @@ createReadStream("src/satcat.csv")
         callback();
       },
       transform(row, _, callback) {
+        // For testing only output the ISS.
+        if (parseInt(row["NORAD_CAT_ID"]) !== 25544) {
+          callback();
+          return;
+        }
+
         const formattedSatConstructorArgs = [
           formatString(row["OBJECT_NAME"]),
           formatString(row["OBJECT_ID"]),

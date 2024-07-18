@@ -3,6 +3,11 @@ export const byObjectId = new Map<string, Satellite>();
 export const byNoradCatId = new Map<number, Satellite>();
 
 export class Satellite {
+  /**
+   * Construct a satellite from CelesTrak's CSV format.
+   *
+   * @see https://celestrak.org/satcat/satcat-format.php
+   */
   constructor(
     public readonly objectName: string,
     public readonly objectId: string,
