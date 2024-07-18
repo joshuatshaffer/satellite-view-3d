@@ -15,12 +15,14 @@ const positionAndVelocity = satellite.propagate(satrec, new Date());
 // The position_velocity result is a key-value pair of ECI coordinates.
 // These are the base results from which all other coordinates are derived.
 const positionEci = positionAndVelocity.position;
-const velocityEci = positionAndVelocity.velocity;
+if (typeof positionEci !== "object") {
+  throw new Error("Position is not an object.");
+}
 
 // Set the Observer at 122.03 West by 36.96 North, in RADIANS
 const observerGd = {
-  longitude: satellite.degreesToRadians(-0.00139),
   latitude: satellite.degreesToRadians(51.47783),
+  longitude: satellite.degreesToRadians(-0.00139),
   height: 0.1420368,
 };
 
@@ -30,37 +32,19 @@ const gmst = satellite.gstime(new Date());
 
 // You can get ECF, Geodetic, Look Angles, and Doppler Factor.
 const positionEcf = satellite.eciToEcf(positionEci, gmst);
-const observerEcf = satellite.geodeticToEcf(observerGd);
 const positionGd = satellite.eciToGeodetic(positionEci, gmst);
 const lookAngles = satellite.ecfToLookAngles(observerGd, positionEcf);
-// dopplerFactor = satellite.dopplerFactor(
-//   observerCoordsEcf,
-//   positionEcf,
-//   velocityEcf
-// );
-
-// The coordinates are all stored in key-value pairs.
-// ECI and ECF are accessed by `x`, `y`, `z` properties.
-const satelliteX = positionEci.x;
-const satelliteY = positionEci.y;
-const satelliteZ = positionEci.z;
-
-// Look Angles may be accessed by `azimuth`, `elevation`, `range_sat` properties.
-const azimuth = lookAngles.azimuth;
-const elevation = lookAngles.elevation;
-const rangeSat = lookAngles.rangeSat;
-
-// Geodetic coords are accessed via `longitude`, `latitude`, `height`.
-const longitude = positionGd.longitude;
-const latitude = positionGd.latitude;
-const height = positionGd.height;
-
-//  Convert the RADIANS to DEGREES.
-const longitudeDeg = satellite.degreesLong(longitude);
-const latitudeDeg = satellite.degreesLat(latitude);
 
 export function App() {
   return (
-    <>{JSON.stringify({ azimuth, elevation, latitudeDeg, longitudeDeg })}</>
+    <>
+      {JSON.stringify({
+        azimuth: lookAngles.azimuth * (180 / Math.PI),
+        elevation: lookAngles.elevation * (180 / Math.PI),
+        latitudeDeg: satellite.degreesLat(positionGd.latitude),
+        longitudeDeg: satellite.degreesLong(positionGd.longitude),
+        height: positionGd.height,
+      })}
+    </>
   );
 }
