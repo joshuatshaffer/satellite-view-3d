@@ -1,4 +1,5 @@
 import * as satellite from "satellite.js";
+import { Orientation } from "./Orientation";
 
 // Sample TLE
 const tleLine1 =
@@ -45,6 +46,7 @@ export function App() {
         longitudeDeg: satellite.degreesLong(positionGd.longitude),
         height: positionGd.height,
       })}
+      <Orientation />
     </>
   );
 }
