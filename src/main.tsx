@@ -1,6 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { App } from "./App.tsx";
+import { initCameraPassthrough } from "./CameraPassthrough.tsx";
+import { initAr } from "./Compass.tsx";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -8,3 +10,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <App />
   </React.StrictMode>
 );
+
+initCameraPassthrough(
+  document.getElementById("camera-passthrough") as HTMLVideoElement
+);
+initAr(document.getElementById("ar-canvas") as HTMLCanvasElement);
