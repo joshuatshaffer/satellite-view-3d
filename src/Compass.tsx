@@ -25,20 +25,10 @@ export function Compass() {
       1000
     );
 
-    const renderer = new THREE.WebGLRenderer({ canvas });
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+    renderer.setClearColor(0x000000, 0);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setAnimationLoop(animate);
-
-    const loader = new THREE.CubeTextureLoader();
-    const texture = loader.load([
-      "/sky/pos-x.jpg",
-      "/sky/neg-x.jpg",
-      "/sky/pos-y.jpg",
-      "/sky/neg-y.jpg",
-      "/sky/pos-z.jpg",
-      "/sky/neg-z.jpg",
-    ]);
-    scene.background = texture;
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute(
@@ -82,5 +72,17 @@ export function Compass() {
     }
   }, [canvas]);
 
-  return <canvas ref={setCanvas} />;
+  return (
+    <canvas
+      ref={setCanvas}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        zIndex: -1,
+      }}
+    />
+  );
 }
