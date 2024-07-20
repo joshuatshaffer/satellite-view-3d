@@ -1,8 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { App } from "./App.tsx";
-import { initCameraPassthrough } from "./CameraPassthrough.tsx";
-import { initAr } from "./Compass.tsx";
+import { initAr } from "./arOverlay.ts";
+import { initCameraPassthrough } from "./cameraPassthrough.ts";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
