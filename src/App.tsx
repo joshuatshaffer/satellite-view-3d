@@ -1,4 +1,5 @@
 import * as satellite from "satellite.js";
+import { CameraPassthrough } from "./CameraPassthrough";
 import { DisplayGeolocationCoordinates } from "./DisplayGeolocationCoordinates";
 import { Orientation } from "./Orientation";
 
@@ -47,6 +48,7 @@ export function App() {
         longitudeDeg: satellite.degreesLong(positionGd.longitude),
         height: positionGd.height,
       })}
+      <CameraPassthrough />
       <DisplayGeolocationCoordinates />
       <Orientation />
     </>
