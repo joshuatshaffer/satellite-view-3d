@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import * as THREE from "three";
-import { degToRad } from "./rotations";
+import { degToRad, deviceOrientationToEuler } from "./rotations";
 
 export function Compass() {
   const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
@@ -44,14 +44,7 @@ export function Compass() {
 
     function animate() {
       if (orientation) {
-        camera.quaternion.setFromEuler(
-          new THREE.Euler(
-            degToRad(orientation.beta ?? 0),
-            degToRad(orientation.gamma ?? 0),
-            degToRad(orientation.alpha ?? 0),
-            "ZXY"
-          )
-        );
+        camera.quaternion.setFromEuler(deviceOrientationToEuler(orientation));
         camera.quaternion.premultiply(
           new THREE.Quaternion().setFromEuler(
             new THREE.Euler(degToRad(90), degToRad(180), 0, "XYZ")
