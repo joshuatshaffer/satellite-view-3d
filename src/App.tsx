@@ -1,4 +1,5 @@
 import * as satellite from "satellite.js";
+import { DisplayGeolocationCoordinates } from "./DisplayGeolocationCoordinates";
 import { Orientation } from "./Orientation";
 
 // Sample TLE
@@ -46,6 +47,7 @@ export function App() {
         longitudeDeg: satellite.degreesLong(positionGd.longitude),
         height: positionGd.height,
       })}
+      <DisplayGeolocationCoordinates />
       <Orientation />
     </>
   );
