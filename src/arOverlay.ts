@@ -6,6 +6,7 @@ import { down, east, north } from "./sceneSpaceDirections";
 export function initAr(canvas: HTMLCanvasElement) {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(
+    // TODO: Match the physical camera's field of view.
     75,
     window.innerWidth / window.innerHeight,
     0.1,
@@ -43,6 +44,13 @@ export function initAr(canvas: HTMLCanvasElement) {
     new THREE.PointsMaterial({ size: 2, vertexColors: true })
   );
   scene.add(particles);
+
+  window.addEventListener("resize", () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
 
   let orientation: DeviceOrientationEvent | null = null;
 
