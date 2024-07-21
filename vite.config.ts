@@ -13,6 +13,8 @@ export default defineConfig({
       certDir: ".devServer/cert",
     }),
   ],
+  base: "/satellite/",
+
   server: {
     host: "0.0.0.0",
   },

@@ -7,6 +7,7 @@
     "test": "vitest",
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "deploy": "/home/joshua/data-i/personal-projects/active/my-server/derployer/derployer.sh satellite ./dist",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
