@@ -72,6 +72,7 @@ export function initAr(canvas: HTMLCanvasElement) {
     }
 
     geometry.attributes.position.setXYZ(3, ...getSatPosition().toArray());
+    geometry.attributes.position.needsUpdate = true;
 
     renderer.render(scene, camera);
   }

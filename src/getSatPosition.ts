@@ -2,6 +2,23 @@ import * as satellite from "satellite.js";
 import * as THREE from "three";
 import { north } from "./sceneSpaceDirections";
 
+let observerGd = {
+  latitude: satellite.degreesToRadians(51.47783),
+  longitude: satellite.degreesToRadians(-0.00139),
+  height: 0.1420368,
+};
+
+window.navigator.geolocation.watchPosition((newPosition) => {
+  observerGd = {
+    latitude: satellite.degreesToRadians(newPosition.coords.latitude),
+    longitude: satellite.degreesToRadians(newPosition.coords.longitude),
+    height:
+      newPosition.coords.altitude !== null
+        ? newPosition.coords.altitude / 1000
+        : observerGd.height,
+  };
+});
+
 export function getSatPosition() {
   const now = new Date();
 
@@ -18,13 +35,6 @@ export function getSatPosition() {
   if (typeof positionEci !== "object") {
     throw new Error("Position is not an object.");
   }
-
-  // Set the Observer at 122.03 West by 36.96 North, in RADIANS
-  const observerGd = {
-    latitude: satellite.degreesToRadians(51.47783),
-    longitude: satellite.degreesToRadians(-0.00139),
-    height: 0.1420368,
-  };
 
   // You will need GMST for some of the coordinate transforms.
   // http://en.wikipedia.org/wiki/Sidereal_time#Definition
