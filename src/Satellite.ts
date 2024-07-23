@@ -9,7 +9,6 @@ export class Satellite {
 
   private satrec: satellite.SatRec;
   private positionEcf: satellite.EcfVec3<number> | null = null;
-  private lookAngles: satellite.LookAngles | null = null;
   private worldPosition: Vector3 | null = null;
 
   constructor(public displayName: string, tleLine1: string, tleLine2: string) {
@@ -17,12 +16,14 @@ export class Satellite {
 
     const text = document.createElement("div");
     text.className = "label";
-    text.textContent = "ISS";
+    text.textContent = this.displayName;
 
     const label = new CSS2DObject(text);
     label.center.set(0, 0);
 
     this.object3D.add(label);
+
+    this.object3D.visible = false;
   }
 
   updatePosition(now = new Date()) {
@@ -41,17 +42,16 @@ export class Satellite {
 
   updateLookAngles() {
     if (this.positionEcf === null) {
-      this.lookAngles = null;
       this.worldPosition = null;
+      this.object3D.visible = false;
       return;
     }
 
-    this.lookAngles = satellite.ecfToLookAngles(observerGd, this.positionEcf);
+    const lookAngles = satellite.ecfToLookAngles(observerGd, this.positionEcf);
     this.worldPosition = north()
-      .applyEuler(
-        new Euler(this.lookAngles.elevation, -this.lookAngles.azimuth, 0)
-      )
+      .applyEuler(new Euler(lookAngles.elevation, -lookAngles.azimuth, 0))
       .multiplyScalar(100);
+    this.object3D.visible = true;
   }
 
   update() {
