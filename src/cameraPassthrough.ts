@@ -1,7 +1,16 @@
 export function initCameraPassthrough(videoElement: HTMLVideoElement) {
-  navigator.mediaDevices
-    .getUserMedia({ video: { facingMode: "environment" } })
-    .then((stream) => {
-      videoElement.srcObject = stream;
-    });
+  const update = () => {
+    if (document.visibilityState === "visible") {
+      navigator.mediaDevices
+        .getUserMedia({ video: { facingMode: "environment" } })
+        .then((stream) => {
+          videoElement.srcObject = stream;
+        });
+    } else {
+      videoElement.srcObject = null;
+    }
+  };
+
+  update();
+  document.addEventListener("visibilitychange", update);
 }
