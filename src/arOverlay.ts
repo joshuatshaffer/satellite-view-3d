@@ -11,7 +11,7 @@ import {
   CSS2DObject,
   CSS2DRenderer,
 } from "three/addons/renderers/CSS2DRenderer.js";
-import { getSatPosition } from "./getSatPosition";
+import { Satellite } from "./Satellite";
 import { degToRad, deviceOrientationToCameraQuaternion } from "./rotations";
 import { down, east, north, south, up, west } from "./sceneSpaceDirections";
 
@@ -61,17 +61,13 @@ export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
     scene.add(label);
   }
 
-  {
-    const text = document.createElement("div");
-    text.className = "label";
-    text.textContent = "ISS";
+  const sat = new Satellite(
+    "ISS",
+    "1 25544U 98067A   24200.15235088  .00018477  00000+0  33066-3 0  9997",
+    "2 25544  51.6371 161.9379 0010265  78.7950 281.4192 15.49981173463357"
+  );
 
-    const label = new CSS2DObject(text);
-    label.position.copy(getSatPosition());
-    label.center.set(0, 0);
-
-    scene.add(label);
-  }
+  scene.add(sat.object3D);
 
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -94,6 +90,8 @@ export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
     if (orientation) {
       deviceOrientationToCameraQuaternion(orientation, camera.quaternion);
     }
+
+    sat.update();
 
     renderer.render(scene, camera);
     labelRenderer.render(scene, camera);
