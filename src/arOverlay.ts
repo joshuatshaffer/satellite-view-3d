@@ -1,16 +1,23 @@
-import * as THREE from "three";
-import { getSatPosition } from "./getSatPosition";
-import { deviceOrientationToCameraQuaternion } from "./rotations";
-import { down, east, north } from "./sceneSpaceDirections";
-
+import {
+  BufferAttribute,
+  BufferGeometry,
+  PerspectiveCamera,
+  Points,
+  PointsMaterial,
+  Scene,
+  WebGLRenderer,
+} from "three";
 import {
   CSS2DObject,
   CSS2DRenderer,
 } from "three/addons/renderers/CSS2DRenderer.js";
+import { getSatPosition } from "./getSatPosition";
+import { deviceOrientationToCameraQuaternion } from "./rotations";
+import { down, east, north } from "./sceneSpaceDirections";
 
 export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(
+  const scene = new Scene();
+  const camera = new PerspectiveCamera(
     // TODO: Match the physical camera's field of view.
     75,
     window.innerWidth / window.innerHeight,
@@ -18,7 +25,7 @@ export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
     1000
   );
 
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+  const renderer = new WebGLRenderer({ canvas, alpha: true });
   renderer.setClearColor(0x000000, 0);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setAnimationLoop(animate);
@@ -29,10 +36,10 @@ export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
   labelRenderer.domElement.style.top = "0px";
   labelRenderer.domElement.style.pointerEvents = "none";
 
-  const geometry = new THREE.BufferGeometry();
+  const geometry = new BufferGeometry();
   geometry.setAttribute(
     "position",
-    new THREE.BufferAttribute(
+    new BufferAttribute(
       new Float32Array([
         ...north().multiplyScalar(100).toArray(),
         ...east().multiplyScalar(100).toArray(),
@@ -44,7 +51,7 @@ export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
   );
   geometry.setAttribute(
     "color",
-    new THREE.BufferAttribute(
+    new BufferAttribute(
       new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1]),
       3
     )
@@ -86,9 +93,9 @@ export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
     scene.add(label);
   }
 
-  const particles = new THREE.Points(
+  const particles = new Points(
     geometry,
-    new THREE.PointsMaterial({ size: 2, vertexColors: true })
+    new PointsMaterial({ size: 2, vertexColors: true })
   );
   scene.add(particles);
 
