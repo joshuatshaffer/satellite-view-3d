@@ -86,6 +86,7 @@ export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
 
   for (const sat of sats) {
     scene.add(sat.object3D);
+    if (sat.nextPassLine) scene.add(sat.nextPassLine);
   }
 
   window.addEventListener("resize", () => {
