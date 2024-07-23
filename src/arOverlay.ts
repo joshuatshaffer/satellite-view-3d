@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { getSatPosition } from "./getSatPosition";
-import { degToRad, deviceOrientationToEuler } from "./rotations";
+import { deviceOrientationToCameraQuaternion } from "./rotations";
 import { down, east, north } from "./sceneSpaceDirections";
 
 export function initAr(canvas: HTMLCanvasElement) {
@@ -63,12 +63,7 @@ export function initAr(canvas: HTMLCanvasElement) {
 
   function animate() {
     if (orientation) {
-      camera.quaternion.setFromEuler(deviceOrientationToEuler(orientation));
-      camera.quaternion.premultiply(
-        new THREE.Quaternion().setFromEuler(
-          new THREE.Euler(degToRad(-90), 0, 0, "XYZ")
-        )
-      );
+      deviceOrientationToCameraQuaternion(orientation, camera.quaternion);
     }
 
     geometry.attributes.position.setXYZ(3, ...getSatPosition().toArray());

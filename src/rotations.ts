@@ -22,12 +22,21 @@ export function deviceOrientationToEuler(orientation: DeviceOrientation) {
   );
 }
 
-export function deviceOrientationToLookAngles(orientation: DeviceOrientation) {
-  const quaternion = new Quaternion();
+const devicePhysicalCameraQuaternion = Object.freeze(
+  new Quaternion().setFromEuler(new Euler(degToRad(-90), 0, 0, "XYZ"))
+);
+
+export function deviceOrientationToCameraQuaternion(
+  orientation: DeviceOrientation,
+  quaternion = new Quaternion()
+) {
   quaternion.setFromEuler(deviceOrientationToEuler(orientation));
-  quaternion.premultiply(
-    new Quaternion().setFromEuler(new Euler(degToRad(-90), 0, 0, "XYZ"))
-  );
+  quaternion.premultiply(devicePhysicalCameraQuaternion);
+  return quaternion;
+}
+
+export function deviceOrientationToLookAngles(orientation: DeviceOrientation) {
+  const quaternion = deviceOrientationToCameraQuaternion(orientation);
 
   const euler = new Euler().setFromQuaternion(quaternion, "YXZ");
 
