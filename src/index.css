@@ -13,3 +13,9 @@ body {
   height: 100%;
   z-index: -1;
 }
+
+.label {
+  color: white;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+    1px 1px 0 #000;
+}

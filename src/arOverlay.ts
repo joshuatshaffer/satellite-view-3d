@@ -1,11 +1,8 @@
 import {
-  BufferAttribute,
   BufferGeometry,
   Line,
   LineBasicMaterial,
   PerspectiveCamera,
-  Points,
-  PointsMaterial,
   Scene,
   Vector3,
   WebGLRenderer,
@@ -16,7 +13,7 @@ import {
 } from "three/addons/renderers/CSS2DRenderer.js";
 import { getSatPosition } from "./getSatPosition";
 import { degToRad, deviceOrientationToCameraQuaternion } from "./rotations";
-import { down, east, north } from "./sceneSpaceDirections";
+import { down, east, north, south, up, west } from "./sceneSpaceDirections";
 
 export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
   const scene = new Scene();
@@ -39,53 +36,27 @@ export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
   labelRenderer.domElement.style.top = "0px";
   labelRenderer.domElement.style.pointerEvents = "none";
 
-  const geometry = new BufferGeometry();
-  geometry.setAttribute(
-    "position",
-    new BufferAttribute(
-      new Float32Array([
-        ...north().multiplyScalar(100).toArray(),
-        ...east().multiplyScalar(100).toArray(),
-        ...down().multiplyScalar(100).toArray(),
-        ...getSatPosition().toArray(),
-      ]),
-      3
-    )
-  );
-  geometry.setAttribute(
-    "color",
-    new BufferAttribute(
-      new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1]),
-      3
-    )
-  );
-
   scene.add(horizontalLine());
   scene.add(horizontalLine(degToRad(30)));
   scene.add(horizontalLine(degToRad(-30)));
   scene.add(horizontalLine(degToRad(60)));
   scene.add(horizontalLine(degToRad(-60)));
 
-  {
-    const text = document.createElement("div");
-    text.className = "label";
-    text.textContent = "north";
+  for (const { text, position } of [
+    { text: "North", position: north() },
+    { text: "South", position: south() },
+    { text: "East", position: east() },
+    { text: "West", position: west() },
+    { text: "Nadir", position: down() },
+    { text: "Zenith", position: up() },
+  ]) {
+    const div = document.createElement("div");
+    div.className = "label";
+    div.textContent = text;
 
-    const label = new CSS2DObject(text);
-    label.position.copy(north().multiplyScalar(100));
-    label.center.set(0.5, 0);
-
-    scene.add(label);
-  }
-
-  {
-    const text = document.createElement("div");
-    text.className = "label";
-    text.textContent = "east";
-
-    const label = new CSS2DObject(text);
-    label.position.copy(east().multiplyScalar(100));
-    label.center.set(0.5, 0);
+    const label = new CSS2DObject(div);
+    label.position.copy(position).multiplyScalar(100);
+    label.center.set(0.5, 0.5);
 
     scene.add(label);
   }
@@ -93,20 +64,14 @@ export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
   {
     const text = document.createElement("div");
     text.className = "label";
-    text.textContent = "down";
+    text.textContent = "ISS";
 
     const label = new CSS2DObject(text);
-    label.position.copy(down().multiplyScalar(100));
-    label.center.set(0.5, 0);
+    label.position.copy(getSatPosition());
+    label.center.set(0, 0);
 
     scene.add(label);
   }
-
-  const particles = new Points(
-    geometry,
-    new PointsMaterial({ size: 2, vertexColors: true })
-  );
-  scene.add(particles);
 
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -129,9 +94,6 @@ export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
     if (orientation) {
       deviceOrientationToCameraQuaternion(orientation, camera.quaternion);
     }
-
-    geometry.attributes.position.setXYZ(3, ...getSatPosition().toArray());
-    geometry.attributes.position.needsUpdate = true;
 
     renderer.render(scene, camera);
     labelRenderer.render(scene, camera);
