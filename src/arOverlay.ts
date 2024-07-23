@@ -1,10 +1,13 @@
 import {
   BufferAttribute,
   BufferGeometry,
+  Line,
+  LineBasicMaterial,
   PerspectiveCamera,
   Points,
   PointsMaterial,
   Scene,
+  Vector3,
   WebGLRenderer,
 } from "three";
 import {
@@ -12,7 +15,7 @@ import {
   CSS2DRenderer,
 } from "three/addons/renderers/CSS2DRenderer.js";
 import { getSatPosition } from "./getSatPosition";
-import { deviceOrientationToCameraQuaternion } from "./rotations";
+import { degToRad, deviceOrientationToCameraQuaternion } from "./rotations";
 import { down, east, north } from "./sceneSpaceDirections";
 
 export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
@@ -56,6 +59,12 @@ export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
       3
     )
   );
+
+  scene.add(horizontalLine());
+  scene.add(horizontalLine(degToRad(30)));
+  scene.add(horizontalLine(degToRad(-30)));
+  scene.add(horizontalLine(degToRad(60)));
+  scene.add(horizontalLine(degToRad(-60)));
 
   {
     const text = document.createElement("div");
@@ -127,4 +136,24 @@ export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
     renderer.render(scene, camera);
     labelRenderer.render(scene, camera);
   }
+}
+
+function horizontalLine(elevation = 0) {
+  const numberOfSegments = 100;
+  const radius = 100;
+
+  return new Line(
+    new BufferGeometry().setFromPoints(
+      Array.from({ length: numberOfSegments + 1 }, (_, i) => {
+        const theta = (Math.PI * 2 * i) / numberOfSegments;
+
+        return new Vector3(
+          Math.cos(elevation) * Math.cos(theta) * radius,
+          Math.sin(elevation) * radius,
+          Math.cos(elevation) * Math.sin(theta) * radius
+        );
+      })
+    ),
+    new LineBasicMaterial({ color: 0x0000ff })
+  );
 }
