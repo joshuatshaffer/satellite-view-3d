@@ -3,7 +3,12 @@ import { getSatPosition } from "./getSatPosition";
 import { deviceOrientationToCameraQuaternion } from "./rotations";
 import { down, east, north } from "./sceneSpaceDirections";
 
-export function initAr(canvas: HTMLCanvasElement) {
+import {
+  CSS2DObject,
+  CSS2DRenderer,
+} from "three/addons/renderers/CSS2DRenderer.js";
+
+export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(
     // TODO: Match the physical camera's field of view.
@@ -17,6 +22,12 @@ export function initAr(canvas: HTMLCanvasElement) {
   renderer.setClearColor(0x000000, 0);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setAnimationLoop(animate);
+
+  const labelRenderer = new CSS2DRenderer({ element: arDom });
+  labelRenderer.setSize(window.innerWidth, window.innerHeight);
+  labelRenderer.domElement.style.position = "absolute";
+  labelRenderer.domElement.style.top = "0px";
+  labelRenderer.domElement.style.pointerEvents = "none";
 
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute(
@@ -39,6 +50,42 @@ export function initAr(canvas: HTMLCanvasElement) {
     )
   );
 
+  {
+    const text = document.createElement("div");
+    text.className = "label";
+    text.textContent = "north";
+
+    const label = new CSS2DObject(text);
+    label.position.copy(north().multiplyScalar(100));
+    label.center.set(0.5, 0);
+
+    scene.add(label);
+  }
+
+  {
+    const text = document.createElement("div");
+    text.className = "label";
+    text.textContent = "east";
+
+    const label = new CSS2DObject(text);
+    label.position.copy(east().multiplyScalar(100));
+    label.center.set(0.5, 0);
+
+    scene.add(label);
+  }
+
+  {
+    const text = document.createElement("div");
+    text.className = "label";
+    text.textContent = "down";
+
+    const label = new CSS2DObject(text);
+    label.position.copy(down().multiplyScalar(100));
+    label.center.set(0.5, 0);
+
+    scene.add(label);
+  }
+
   const particles = new THREE.Points(
     geometry,
     new THREE.PointsMaterial({ size: 2, vertexColors: true })
@@ -50,6 +97,7 @@ export function initAr(canvas: HTMLCanvasElement) {
     camera.updateProjectionMatrix();
 
     renderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
   });
 
   let orientation: DeviceOrientationEvent | null = null;
@@ -70,5 +118,6 @@ export function initAr(canvas: HTMLCanvasElement) {
     geometry.attributes.position.needsUpdate = true;
 
     renderer.render(scene, camera);
+    labelRenderer.render(scene, camera);
   }
 }

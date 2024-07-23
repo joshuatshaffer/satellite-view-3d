@@ -14,4 +14,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 initCameraPassthrough(
   document.getElementById("camera-passthrough") as HTMLVideoElement
 );
-initAr(document.getElementById("ar-canvas") as HTMLCanvasElement);
+initAr(
+  document.getElementById("ar-canvas") as HTMLCanvasElement,
+  document.getElementById("ar-dom") as HTMLDivElement
+);
