@@ -12,6 +12,7 @@ import {
   CSS2DRenderer,
 } from "three/addons/renderers/CSS2DRenderer.js";
 import { Satellite } from "./Satellite";
+import { orientation } from "./deviceOrientation";
 import { degToRad, deviceOrientationToCameraQuaternion } from "./rotations";
 import { down, east, north, south, up, west } from "./sceneSpaceDirections";
 
@@ -96,15 +97,6 @@ export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
     renderer.setSize(window.innerWidth, window.innerHeight);
     labelRenderer.setSize(window.innerWidth, window.innerHeight);
   });
-
-  let orientation: DeviceOrientationEvent | null = null;
-
-  window.addEventListener(
-    "deviceorientationabsolute",
-    (event: DeviceOrientationEvent) => {
-      orientation = event;
-    }
-  );
 
   function animate() {
     if (orientation) {

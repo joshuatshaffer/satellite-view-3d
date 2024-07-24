@@ -1,3 +1,15 @@
+import { useWarnings } from "./warnings";
+
 export function App() {
-  return <></>;
+  const warnings = useWarnings();
+
+  return (
+    <>
+      <ul>
+        {warnings.map((warning) => (
+          <li>{warning}</li>
+        ))}
+      </ul>
+    </>
+  );
 }
