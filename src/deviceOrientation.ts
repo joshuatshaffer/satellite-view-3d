@@ -29,26 +29,32 @@ function init() {
             "This app does not work without absolute device orientation. Permission was denied."
           );
         }
+
+        startListening();
       });
+  } else {
+    startListening();
   }
 
-  const onDeviceOrientation = (event: DeviceOrientationEvent) => {
-    if (orientation?.absolute && !event.absolute) return;
-    orientation = event;
-    disableDeviceOrientationNullWarning();
-  };
-
-  window.addEventListener("deviceorientation", onDeviceOrientation);
-
-  window.addEventListener(
-    "deviceorientationabsolute",
-    (event: DeviceOrientationEvent) => {
+  function startListening() {
+    const onDeviceOrientation = (event: DeviceOrientationEvent) => {
+      if (orientation?.absolute && !event.absolute) return;
       orientation = event;
       disableDeviceOrientationNullWarning();
+    };
 
-      window.removeEventListener("deviceorientation", onDeviceOrientation);
-    }
-  );
+    window.addEventListener("deviceorientation", onDeviceOrientation);
+
+    window.addEventListener(
+      "deviceorientationabsolute",
+      (event: DeviceOrientationEvent) => {
+        orientation = event;
+        disableDeviceOrientationNullWarning();
+
+        window.removeEventListener("deviceorientation", onDeviceOrientation);
+      }
+    );
+  }
 }
 
 init();

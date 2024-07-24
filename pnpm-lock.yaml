@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  eruda:
+    specifier: 3.2.1
+    version: 3.2.1
   react:
     specifier: 18.3.1
     version: 18.3.1
@@ -1244,6 +1247,10 @@ packages:
   /electron-to-chromium@1.4.829:
     resolution: {integrity: sha512-5qp1N2POAfW0u1qGAxXEtz6P7bO1m6gpZr5hdf5ve6lxpLM7MpiM4jIPz7xcrNlClQMafbyUDDWjlIQZ1Mw0Rw==}
     dev: true
+
+  /eruda@3.2.1:
+    resolution: {integrity: sha512-iophjRvysx2ndIhqos+WpGUpou0BHGZOYcLld8oB65oH9+Cz7FExC5xEJ/ulzxpWoqw4Kh8gM7spuaGJhz0UeA==}
+    dev: false
 
   /esbuild@0.21.5:
     resolution: {integrity: sha512-mg3OPMV4hXywwpoDxu3Qda5xCKQi+vCTZq8S9J/EpkhB2HzKXq4SNFZE3+NK93JYxc8VMSep+lOUSC/RVKaBqw==}
