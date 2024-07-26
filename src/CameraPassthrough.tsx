@@ -33,7 +33,6 @@ export function CameraPassthrough() {
   return (
     <video
       ref={setVideoElement}
-      style={{ zIndex: -2 }}
       id="camera-passthrough"
       autoPlay
       playsInline
