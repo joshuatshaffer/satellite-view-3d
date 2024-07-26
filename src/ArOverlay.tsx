@@ -1,3 +1,4 @@
+import { useStore } from "jotai";
 import { useEffect, useState } from "react";
 import { initAr } from "./arOverlay";
 
@@ -5,13 +6,15 @@ export function ArOverlay() {
   const [arCanvas, setArCanvas] = useState<HTMLCanvasElement | null>(null);
   const [arDom, setArDom] = useState<HTMLDivElement | null>(null);
 
+  const store = useStore();
+
   useEffect(() => {
     if (!arCanvas || !arDom) {
       return;
     }
 
-    initAr(arCanvas, arDom);
-  }, [arCanvas, arDom]);
+    return initAr({ canvas: arCanvas, arDom, store });
+  }, [arCanvas, arDom, store]);
 
   return (
     <>

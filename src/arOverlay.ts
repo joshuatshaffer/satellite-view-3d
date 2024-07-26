@@ -1,5 +1,7 @@
+import type { useStore } from "jotai";
 import {
   BufferGeometry,
+  Clock,
   Line,
   LineBasicMaterial,
   PerspectiveCamera,
@@ -7,6 +9,7 @@ import {
   Vector3,
   WebGLRenderer,
 } from "three";
+import Stats from "three/addons/libs/stats.module.js";
 import {
   CSS2DObject,
   CSS2DRenderer,
@@ -15,8 +18,24 @@ import { Satellite } from "./Satellite";
 import { orientation } from "./deviceOrientation";
 import { degToRad, deviceOrientationToCameraQuaternion } from "./rotations";
 import { down, east, north, south, up, west } from "./sceneSpaceDirections";
+import { viewControlSettingAtom } from "./settings";
 
-export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
+export function initAr({
+  canvas,
+  arDom,
+  store,
+}: {
+  canvas: HTMLCanvasElement;
+  arDom: HTMLDivElement;
+  store: ReturnType<typeof useStore>;
+}) {
+  console.log("Initializing AR overlay");
+
+  const stats = new Stats();
+  document.body.appendChild(stats.dom);
+
+  const clock = new Clock();
+
   const scene = new Scene();
   const camera = new PerspectiveCamera(
     // TODO: Match the physical camera's field of view.
@@ -90,26 +109,47 @@ export function initAr(canvas: HTMLCanvasElement, arDom: HTMLDivElement) {
     if (sat.nextPassLine) scene.add(sat.nextPassLine);
   }
 
-  window.addEventListener("resize", () => {
+  const onWindowResize = () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
 
     renderer.setSize(window.innerWidth, window.innerHeight);
     labelRenderer.setSize(window.innerWidth, window.innerHeight);
-  });
+  };
+  window.addEventListener("resize", onWindowResize);
 
   function animate() {
-    if (orientation) {
-      deviceOrientationToCameraQuaternion(orientation, camera.quaternion);
+    const delta = clock.getDelta();
+
+    const viewControlSetting = store.get(viewControlSettingAtom);
+
+    if (viewControlSetting === "deviceOrientation") {
+      if (orientation) {
+        deviceOrientationToCameraQuaternion(orientation, camera.quaternion);
+      }
+    } else {
+      camera.rotateY(delta * 0.01);
+      camera.rotateX(delta * 0.0025);
     }
 
     for (const sat of sats) {
       sat.update();
     }
 
+    stats.update();
+
     renderer.render(scene, camera);
     labelRenderer.render(scene, camera);
   }
+
+  return () => {
+    console.log("Cleaning up AR overlay");
+    renderer.setAnimationLoop(null);
+    renderer.dispose();
+    stats.dom.remove();
+    labelRenderer.domElement.innerHTML = "";
+    window.removeEventListener("resize", onWindowResize);
+  };
 }
 
 function horizontalLine(elevation = 0) {

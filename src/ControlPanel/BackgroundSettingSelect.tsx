@@ -1,5 +1,6 @@
 import { useAtom } from "jotai";
-import { backgroundSettingAtom } from "../settings";
+import { isElementOf } from "../isElementOf";
+import { backgroundSettingAtom, backgroundSettingValues } from "../settings";
 
 export function BackgroundSettingSelect() {
   const [background, setBackground] = useAtom(backgroundSettingAtom);
@@ -12,7 +13,7 @@ export function BackgroundSettingSelect() {
         onChange={(event) => {
           const newValue = event.target.value;
 
-          if (newValue !== "cameraPassthrough" && newValue !== "none") {
+          if (!isElementOf(backgroundSettingValues, newValue)) {
             throw new Error("Invalid background setting");
           }
 
