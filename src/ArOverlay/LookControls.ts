@@ -2,8 +2,23 @@ import { Camera } from "three";
 import { degToRad } from "../rotations";
 import styles from "./LookControls.module.css";
 
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value));
+}
+
 export function LookControls(camera: Camera, domElement: HTMLElement) {
+  const movementScale = 0.01;
+
+  const maxElevation = degToRad(90);
+  const minElevation = degToRad(-90);
+
+  let prevClientX = 0;
+  let prevClientY = 0;
+
   const onPointerDown = (event: PointerEvent) => {
+    prevClientX = event.clientX;
+    prevClientY = event.clientY;
+
     domElement.setPointerCapture(event.pointerId);
 
     domElement.addEventListener("pointermove", onPointerMove);
@@ -12,14 +27,18 @@ export function LookControls(camera: Camera, domElement: HTMLElement) {
   };
 
   const onPointerMove = (event: PointerEvent) => {
-    const { movementX, movementY } = event;
+    const deltaClientX = event.clientX - prevClientX;
+    const deltaClientY = event.clientY - prevClientY;
+    prevClientX = event.clientX;
+    prevClientY = event.clientY;
 
     camera.rotation.set(
-      Math.max(
-        -degToRad(90),
-        Math.min(degToRad(90), camera.rotation.x - movementY * 0.01)
+      clamp(
+        camera.rotation.x - deltaClientY * movementScale,
+        minElevation,
+        maxElevation
       ),
-      camera.rotation.y - movementX * 0.01,
+      camera.rotation.y - deltaClientX * movementScale,
       0,
       "YXZ"
     );
