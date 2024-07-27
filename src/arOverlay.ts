@@ -14,6 +14,7 @@ import {
   CSS2DObject,
   CSS2DRenderer,
 } from "three/addons/renderers/CSS2DRenderer.js";
+import { LookControls } from "./LookControls";
 import { Satellite } from "./Satellite";
 import { orientation } from "./deviceOrientation";
 import { degToRad, deviceOrientationToCameraQuaternion } from "./rotations";
@@ -55,6 +56,8 @@ export function initAr({
   labelRenderer.domElement.style.position = "absolute";
   labelRenderer.domElement.style.top = "0px";
   labelRenderer.domElement.style.pointerEvents = "none";
+
+  const lookControls = LookControls(camera, canvas);
 
   scene.add(horizontalLine());
   scene.add(horizontalLine(degToRad(30)));
@@ -121,15 +124,17 @@ export function initAr({
   function animate() {
     const delta = clock.getDelta();
 
-    const viewControlSetting = store.get(viewControlSettingAtom);
+    if (!lookControls) {
+      const viewControlSetting = store.get(viewControlSettingAtom);
 
-    if (viewControlSetting === "deviceOrientation") {
-      if (orientation) {
-        deviceOrientationToCameraQuaternion(orientation, camera.quaternion);
+      if (viewControlSetting === "deviceOrientation") {
+        if (orientation) {
+          deviceOrientationToCameraQuaternion(orientation, camera.quaternion);
+        }
+      } else {
+        camera.rotateY(delta * 0.01);
+        camera.rotateX(delta * 0.0025);
       }
-    } else {
-      camera.rotateY(delta * 0.01);
-      camera.rotateX(delta * 0.0025);
     }
 
     for (const sat of sats) {
@@ -144,6 +149,7 @@ export function initAr({
 
   return () => {
     console.log("Cleaning up AR overlay");
+    lookControls.dispose();
     renderer.setAnimationLoop(null);
     renderer.dispose();
     stats.dom.remove();
