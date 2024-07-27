@@ -1,6 +1,12 @@
 {
   "compilerOptions": {
-    "composite": true,
+    "plugins": [{ "name": "typescript-plugin-css-modules" }],
+
+    // Cannot use `"composite": true` with typescript-plugin-css-modules.
+    // See https://github.com/mrmckeb/typescript-plugin-css-modules/issues/222
+    "composite": false,
+    "incremental": true,
+
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2020",
     "useDefineForClassFields": true,
