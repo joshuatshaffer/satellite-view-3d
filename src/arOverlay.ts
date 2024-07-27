@@ -1,7 +1,5 @@
-import type { useStore } from "jotai";
 import {
   BufferGeometry,
-  Clock,
   Line,
   LineBasicMaterial,
   PerspectiveCamera,
@@ -14,12 +12,11 @@ import {
   CSS2DObject,
   CSS2DRenderer,
 } from "three/addons/renderers/CSS2DRenderer.js";
-import { LookControls } from "./LookControls";
+import { ViewControls } from "./ArOverlay/ViewControls";
 import { Satellite } from "./Satellite";
-import { orientation } from "./deviceOrientation";
-import { degToRad, deviceOrientationToCameraQuaternion } from "./rotations";
+import { Store } from "./jotai-types";
+import { degToRad } from "./rotations";
 import { down, east, north, south, up, west } from "./sceneSpaceDirections";
-import { viewControlSettingAtom } from "./settings";
 
 export function initAr({
   canvas,
@@ -28,14 +25,12 @@ export function initAr({
 }: {
   canvas: HTMLCanvasElement;
   arDom: HTMLDivElement;
-  store: ReturnType<typeof useStore>;
+  store: Store;
 }) {
   console.log("Initializing AR overlay");
 
   const stats = new Stats();
   document.body.appendChild(stats.dom);
-
-  const clock = new Clock();
 
   const scene = new Scene();
   const camera = new PerspectiveCamera(
@@ -57,7 +52,8 @@ export function initAr({
   labelRenderer.domElement.style.top = "0px";
   labelRenderer.domElement.style.pointerEvents = "none";
 
-  const lookControls = LookControls(camera, canvas);
+  const viewControls = ViewControls({ camera, domElement: canvas, store });
+  viewControls.enable();
 
   scene.add(horizontalLine());
   scene.add(horizontalLine(degToRad(30)));
@@ -122,20 +118,7 @@ export function initAr({
   window.addEventListener("resize", onWindowResize);
 
   function animate() {
-    const delta = clock.getDelta();
-
-    if (!lookControls) {
-      const viewControlSetting = store.get(viewControlSettingAtom);
-
-      if (viewControlSetting === "deviceOrientation") {
-        if (orientation) {
-          deviceOrientationToCameraQuaternion(orientation, camera.quaternion);
-        }
-      } else {
-        camera.rotateY(delta * 0.01);
-        camera.rotateX(delta * 0.0025);
-      }
-    }
+    viewControls.update();
 
     for (const sat of sats) {
       sat.update();
@@ -149,7 +132,7 @@ export function initAr({
 
   return () => {
     console.log("Cleaning up AR overlay");
-    lookControls.dispose();
+    viewControls.disable();
     renderer.setAnimationLoop(null);
     renderer.dispose();
     stats.dom.remove();

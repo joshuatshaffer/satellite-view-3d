@@ -1,6 +1,6 @@
 import { Camera } from "three";
+import { degToRad } from "../rotations";
 import styles from "./LookControls.module.css";
-import { degToRad } from "./rotations";
 
 export function LookControls(camera: Camera, domElement: HTMLElement) {
   const onPointerDown = (event: PointerEvent) => {
@@ -31,12 +31,13 @@ export function LookControls(camera: Camera, domElement: HTMLElement) {
     domElement.classList.remove(styles.lookControlsActive);
   };
 
-  domElement.addEventListener("pointerdown", onPointerDown);
-
-  domElement.classList.add(styles.lookControls);
-
   return {
-    dispose() {
+    enable: () => {
+      domElement.addEventListener("pointerdown", onPointerDown);
+      domElement.classList.add(styles.lookControls);
+    },
+
+    disable: () => {
       domElement.removeEventListener("pointerdown", onPointerDown);
       domElement.removeEventListener("pointermove", onPointerMove);
       domElement.removeEventListener("pointerup", onPointerUp);
