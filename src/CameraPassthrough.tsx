@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import styles from "./ArOverlay.module.css";
 import { useAsync } from "./useAsync";
 import { useVisibilityState } from "./useVisibilityState";
 
@@ -33,7 +34,7 @@ export function CameraPassthrough() {
   return (
     <video
       ref={setVideoElement}
-      id="camera-passthrough"
+      className={styles.cameraPassthrough}
       autoPlay
       playsInline
       muted
