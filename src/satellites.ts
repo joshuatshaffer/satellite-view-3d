@@ -11,18 +11,6 @@ import { CSS2DObject } from "three/examples/jsm/Addons.js";
 import { observerGd } from "./observer";
 import { north } from "./sceneSpaceDirections";
 
-import tle from "./tle.txt?raw";
-
-const lines = tle.split("\n");
-const definitions: SatelliteDefinition[] = [];
-
-for (let i = 0; i < lines.length - 2; i += 3) {
-  definitions.push({
-    displayName: lines[i],
-    tle: [lines[i + 1], lines[i + 2]],
-  });
-}
-
 type Tle = [line1: string, line2: string];
 
 interface SatelliteDefinition {
@@ -31,6 +19,8 @@ interface SatelliteDefinition {
 }
 
 export function makeSatellites(scene: Scene) {
+  let definitions: SatelliteDefinition[] = [];
+
   let records = definitions.map((d) =>
     satellite.twoline2satrec(d.tle[0], d.tle[1])
   );
@@ -39,11 +29,11 @@ export function makeSatellites(scene: Scene) {
 
   let scenePositions = new Float32Array(3 * records.length);
 
-  const geometry = new BufferGeometry();
+  let geometry = new BufferGeometry();
   geometry.setAttribute("position", new BufferAttribute(scenePositions, 3));
   geometry.setDrawRange(0, indexMap.length);
 
-  const particles = new Points(
+  let particles = new Points(
     geometry,
     new PointsMaterial({ size: 2, color: 0xff0000, sizeAttenuation: false })
   );
@@ -110,6 +100,49 @@ export function makeSatellites(scene: Scene) {
       labels[i].visible = false;
     }
   };
+
+  const setSatellites = (newDefinitions: SatelliteDefinition[]) => {
+    definitions = newDefinitions;
+    records = definitions.map((d) =>
+      satellite.twoline2satrec(d.tle[0], d.tle[1])
+    );
+
+    scenePositions = new Float32Array(3 * records.length);
+
+    scene.remove(particles);
+    particles.geometry.dispose();
+    particles.material.dispose();
+
+    geometry = new BufferGeometry();
+    geometry.setAttribute("position", new BufferAttribute(scenePositions, 3));
+    geometry.setDrawRange(0, indexMap.length);
+
+    particles = new Points(
+      geometry,
+      new PointsMaterial({ size: 2, color: 0xff0000, sizeAttenuation: false })
+    );
+    scene.add(particles);
+  };
+
+  const fetchSatelliteDefinitions = async () => {
+    const response = await fetch(
+      "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle"
+    );
+    const tle = await response.text();
+    const lines = tle.split("\n");
+    const definitions: SatelliteDefinition[] = [];
+
+    for (let i = 0; i < lines.length - 2; i += 3) {
+      definitions.push({
+        displayName: lines[i],
+        tle: [lines[i + 1], lines[i + 2]],
+      });
+    }
+
+    setSatellites(definitions);
+  };
+
+  fetchSatelliteDefinitions();
 
   return {
     update: () => {
