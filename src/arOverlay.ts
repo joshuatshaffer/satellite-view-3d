@@ -1,12 +1,4 @@
-import {
-  BufferGeometry,
-  LineBasicMaterial,
-  LineLoop,
-  PerspectiveCamera,
-  Scene,
-  Vector3,
-  WebGLRenderer,
-} from "three";
+import { PerspectiveCamera, Scene, WebGLRenderer } from "three";
 import Stats from "three/addons/libs/stats.module.js";
 import {
   CSS2DObject,
@@ -14,8 +6,8 @@ import {
 } from "three/addons/renderers/CSS2DRenderer.js";
 import styles from "./ArOverlay.module.css";
 import { ViewControls } from "./ArOverlay/ViewControls";
+import { makeGrid } from "./grid";
 import { Store } from "./jotai-types";
-import { degToRad } from "./rotations";
 import { makeSatellites } from "./satellites";
 import { down, east, north, south, up, west } from "./sceneSpaceDirections";
 
@@ -56,11 +48,7 @@ export function initAr({
   const viewControls = ViewControls({ camera, domElement: canvas, store });
   viewControls.enable();
 
-  scene.add(horizontalLine());
-  scene.add(horizontalLine(degToRad(30)));
-  scene.add(horizontalLine(degToRad(-30)));
-  scene.add(horizontalLine(degToRad(60)));
-  scene.add(horizontalLine(degToRad(-60)));
+  scene.add(makeGrid());
 
   for (const { text, position } of [
     { text: "North", position: north() },
@@ -112,24 +100,4 @@ export function initAr({
     labelRenderer.domElement.innerHTML = "";
     window.removeEventListener("resize", onWindowResize);
   };
-}
-
-function horizontalLine(elevation = 0) {
-  const numberOfVertices = 100;
-  const radius = 100;
-
-  return new LineLoop(
-    new BufferGeometry().setFromPoints(
-      Array.from({ length: numberOfVertices }, (_, i) => {
-        const theta = (Math.PI * 2 * i) / numberOfVertices;
-
-        return new Vector3(
-          Math.cos(elevation) * Math.cos(theta) * radius,
-          Math.sin(elevation) * radius,
-          Math.cos(elevation) * Math.sin(theta) * radius
-        );
-      })
-    ),
-    new LineBasicMaterial({ color: 0x0000ff })
-  );
 }
