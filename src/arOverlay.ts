@@ -1,7 +1,7 @@
 import {
   BufferGeometry,
-  Line,
   LineBasicMaterial,
+  LineLoop,
   PerspectiveCamera,
   Scene,
   Vector3,
@@ -115,13 +115,13 @@ export function initAr({
 }
 
 function horizontalLine(elevation = 0) {
-  const numberOfSegments = 100;
+  const numberOfVertices = 100;
   const radius = 100;
 
-  return new Line(
+  return new LineLoop(
     new BufferGeometry().setFromPoints(
-      Array.from({ length: numberOfSegments + 1 }, (_, i) => {
-        const theta = (Math.PI * 2 * i) / numberOfSegments;
+      Array.from({ length: numberOfVertices }, (_, i) => {
+        const theta = (Math.PI * 2 * i) / numberOfVertices;
 
         return new Vector3(
           Math.cos(elevation) * Math.cos(theta) * radius,
