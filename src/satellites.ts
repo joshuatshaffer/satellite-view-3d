@@ -7,6 +7,7 @@ import {
   PointsMaterial,
   Scene,
 } from "three";
+import { CSS2DObject } from "three/examples/jsm/Addons.js";
 import { observerGd } from "./observer";
 import { north } from "./sceneSpaceDirections";
 
@@ -67,7 +68,7 @@ export function makeSatellites(scene: Scene) {
   );
   scene.add(particles);
 
-  const update = (nowDate = new Date()) => {
+  const updatePositions = (nowDate = new Date()) => {
     const nowGmst = satellite.gstime(nowDate);
 
     indexMap = [];
@@ -99,8 +100,41 @@ export function makeSatellites(scene: Scene) {
     geometry.attributes.position.needsUpdate = true;
   };
 
+  const labels = Array.from({ length: 5 }, () => {
+    const text = document.createElement("div");
+    text.className = "label";
+
+    const label = new CSS2DObject(text);
+    label.center.set(0, 0);
+
+    scene.add(label);
+
+    return label;
+  });
+
+  const updateLabels = () => {
+    let i = 0;
+
+    for (; i < labels.length && i < indexMap.length; i++) {
+      labels[i].visible = true;
+      labels[i].element.textContent = definitions[indexMap[i]].displayName;
+      labels[i].position.set(
+        scenePositions[i * 3],
+        scenePositions[i * 3 + 1],
+        scenePositions[i * 3 + 2]
+      );
+    }
+
+    for (; i < labels.length; i++) {
+      labels[i].visible = false;
+    }
+  };
+
   return {
-    update,
+    update: () => {
+      updatePositions();
+      updateLabels();
+    },
 
     dispose: () => {
       scene.remove(particles);
