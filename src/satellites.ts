@@ -8,6 +8,7 @@ import {
   Scene,
 } from "three";
 import { CSS2DObject } from "three/examples/jsm/Addons.js";
+import tleUrl from "./generated/tle.txt";
 import { observerGd } from "./observer";
 import { north } from "./sceneSpaceDirections";
 
@@ -125,9 +126,7 @@ export function makeSatellites(scene: Scene) {
   };
 
   const fetchSatelliteDefinitions = async () => {
-    const response = await fetch(
-      "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle"
-    );
+    const response = await fetch(tleUrl);
     const tle = await response.text();
     const lines = tle.split("\n");
     const definitions: SatelliteDefinition[] = [];

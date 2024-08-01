@@ -1,5 +1,6 @@
 # Generated files
 *.generated.*
+src/generated
 
 # Logs
 logs
