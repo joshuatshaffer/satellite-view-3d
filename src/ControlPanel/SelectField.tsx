@@ -1,5 +1,6 @@
 import { ReactNode, useId } from "react";
 import { isElementOf } from "../isElementOf";
+import styles from "./Field.module.css";
 
 interface SelectFieldProps<T extends string> {
   label: ReactNode;
@@ -19,10 +20,13 @@ export function SelectField<const T extends string>({
   const id = useId();
 
   return (
-    <div>
-      <label htmlFor={id}>{label} </label>
+    <div className={styles.fieldContainer}>
+      <label htmlFor={id} className={styles.fieldLabel}>
+        {label}{" "}
+      </label>
       <select
         id={id}
+        className={styles.fieldInput}
         value={value}
         onChange={(event) => {
           const newValue = event.target.value;

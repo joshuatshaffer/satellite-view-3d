@@ -1,0 +1,13 @@
+.fieldContainer {
+  margin: 5px 0;
+  display: flex;
+}
+
+.fieldLabel {
+  flex-grow: 1;
+  padding-right: 0.3em;
+}
+
+.fieldInput {
+  width: 150px;
+}

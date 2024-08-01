@@ -5,6 +5,7 @@ import {
   observerPositionModeAtom,
   observerPositionModes,
 } from "../settings";
+import { NumberField } from "./NumberField";
 import { SelectField } from "./SelectField";
 
 export function ObserverPosition() {
@@ -26,44 +27,30 @@ export function ObserverPosition() {
         value={mode}
         onChange={setMode}
       />
-      <div>
-        <label>Lat </label>
-        <input
-          type="number"
-          min={-90}
-          max={90}
-          value={latitude}
-          onChange={(event) => {
-            const newLatitude = parseFloat(event.target.value);
-
-            if (!isNaN(newLatitude)) {
-              setPosition((prev) => ({
-                ...prev,
-                latitude: newLatitude,
-              }));
-            }
-          }}
-        />
-      </div>
-      <div>
-        <label>Lon </label>
-        <input
-          type="number"
-          min={-180}
-          max={180}
-          value={longitude}
-          onChange={(event) => {
-            const newLongitude = parseFloat(event.target.value);
-
-            if (!isNaN(newLongitude)) {
-              setPosition((prev) => ({
-                ...prev,
-                longitude: newLongitude,
-              }));
-            }
-          }}
-        />
-      </div>
+      <NumberField
+        label="Lat"
+        min={-90}
+        max={90}
+        value={latitude}
+        onChange={(latitude) => {
+          setPosition((prev) => ({
+            ...prev,
+            latitude,
+          }));
+        }}
+      />
+      <NumberField
+        label="Lon"
+        min={-180}
+        max={180}
+        value={longitude}
+        onChange={(longitude) => {
+          setPosition((prev) => ({
+            ...prev,
+            longitude,
+          }));
+        }}
+      />
       <div>{formatAngleUnits(degToDms(latitude))}</div>
       <div>{formatAngleUnits(degToDms(longitude))}</div>
     </fieldset>
