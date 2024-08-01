@@ -8,7 +8,6 @@ import {
   Vector3,
 } from "three";
 import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
-import { observerGd } from "./observer";
 import { north } from "./sceneSpaceDirections";
 
 export class Satellite {
@@ -20,7 +19,12 @@ export class Satellite {
 
   public nextPassLine: Line | null = null;
 
-  constructor(public displayName: string, tleLine1: string, tleLine2: string) {
+  constructor(
+    public displayName: string,
+    tleLine1: string,
+    tleLine2: string,
+    private observerGd: satellite.GeodeticLocation
+  ) {
     this.satrec = satellite.twoline2satrec(tleLine1, tleLine2);
 
     this.update();
@@ -97,7 +101,10 @@ export class Satellite {
         satellite.gstime(timeDate)
       );
 
-      const lookAngles = satellite.ecfToLookAngles(observerGd, positionEcf);
+      const lookAngles = satellite.ecfToLookAngles(
+        this.observerGd,
+        positionEcf
+      );
 
       if (state.status === "searching") {
         if (lookAngles.elevation > 0) {
@@ -142,7 +149,10 @@ export class Satellite {
       return;
     }
 
-    const lookAngles = satellite.ecfToLookAngles(observerGd, this.positionEcf);
+    const lookAngles = satellite.ecfToLookAngles(
+      this.observerGd,
+      this.positionEcf
+    );
 
     // console.log(this.displayName, {
     //   azimuth: radToDeg(lookAngles.azimuth),

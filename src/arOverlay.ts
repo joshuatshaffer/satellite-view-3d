@@ -69,7 +69,7 @@ export function initAr({
     scene.add(label);
   }
 
-  const satellites = makeSatellites(scene);
+  const satellites = makeSatellites(scene, store);
 
   const onWindowResize = () => {
     camera.aspect = window.innerWidth / window.innerHeight;

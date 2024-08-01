@@ -10,8 +10,9 @@ import {
 import { CSS2DObject } from "three/examples/jsm/Addons.js";
 import styles from "./ArOverlay.module.css";
 import tleUrl from "./generated/tle.txt";
-import { observerGd } from "./observer";
+import { Store } from "./jotai-types";
 import { north } from "./sceneSpaceDirections";
+import { observerGdAtom } from "./settings";
 
 type Tle = [line1: string, line2: string];
 
@@ -20,7 +21,7 @@ interface SatelliteDefinition {
   tle: Tle;
 }
 
-export function makeSatellites(scene: Scene) {
+export function makeSatellites(scene: Scene, store: Store) {
   let definitions: SatelliteDefinition[] = [];
 
   let records = definitions.map((d) =>
@@ -43,6 +44,8 @@ export function makeSatellites(scene: Scene) {
 
   const updatePositions = (nowDate = new Date()) => {
     const nowGmst = satellite.gstime(nowDate);
+
+    const observerGd = store.get(observerGdAtom);
 
     indexMap = [];
     for (let i = 0; i < records.length; i++) {
