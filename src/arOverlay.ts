@@ -12,6 +12,7 @@ import {
   CSS2DObject,
   CSS2DRenderer,
 } from "three/addons/renderers/CSS2DRenderer.js";
+import styles from "./ArOverlay.module.css";
 import { ViewControls } from "./ArOverlay/ViewControls";
 import { Store } from "./jotai-types";
 import { degToRad } from "./rotations";
@@ -70,7 +71,7 @@ export function initAr({
     { text: "Zenith", position: up() },
   ]) {
     const div = document.createElement("div");
-    div.className = "label";
+    div.className = styles.label;
     div.textContent = text;
 
     const label = new CSS2DObject(div);

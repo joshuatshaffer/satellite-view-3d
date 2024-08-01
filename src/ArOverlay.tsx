@@ -1,6 +1,7 @@
 import { useStore } from "jotai";
 import { useEffect, useState } from "react";
 import { initAr } from "./arOverlay";
+import styles from "./ArOverlay.module.css";
 
 export function ArOverlay() {
   const [arCanvas, setArCanvas] = useState<HTMLCanvasElement | null>(null);
@@ -18,8 +19,8 @@ export function ArOverlay() {
 
   return (
     <>
-      <canvas ref={setArCanvas} id="ar-canvas"></canvas>
-      <div ref={setArDom} id="ar-dom"></div>
+      <canvas ref={setArCanvas} className={styles.arCanvas} />
+      <div ref={setArDom} className={styles.arDom} />
     </>
   );
 }

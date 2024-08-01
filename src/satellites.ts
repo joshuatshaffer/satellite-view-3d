@@ -8,6 +8,7 @@ import {
   Scene,
 } from "three";
 import { CSS2DObject } from "three/examples/jsm/Addons.js";
+import styles from "./ArOverlay.module.css";
 import tleUrl from "./generated/tle.txt";
 import { observerGd } from "./observer";
 import { north } from "./sceneSpaceDirections";
@@ -74,7 +75,7 @@ export function makeSatellites(scene: Scene) {
 
   const labels = Array.from({ length: 5 }, () => {
     const text = document.createElement("div");
-    text.className = "label";
+    text.className = styles.label;
 
     const label = new CSS2DObject(text);
     label.center.set(0, 0);
