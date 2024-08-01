@@ -1,11 +1,11 @@
 import { useAtom } from "jotai";
 import { degToDms, formatAngleUnits } from "../AngleUnits";
-import { isElementOf } from "../isElementOf";
 import {
   observerPositionAtom,
   observerPositionModeAtom,
   observerPositionModes,
 } from "../settings";
+import { SelectField } from "./SelectField";
 
 export function ObserverPosition() {
   const [mode, setMode] = useAtom(observerPositionModeAtom);
@@ -14,24 +14,18 @@ export function ObserverPosition() {
   return (
     <fieldset>
       <legend>Observer Position</legend>
-      <div>
-        <label>Mode </label>
-        <select
-          value={mode}
-          onChange={(event) => {
-            const newValue = event.target.value;
-
-            if (!isElementOf(observerPositionModes, newValue)) {
-              throw new Error("Invalid observer position mode");
-            }
-
-            setMode(newValue);
-          }}
-        >
-          <option value="currentPosition">Current position</option>
-          <option value="manual">Manual</option>
-        </select>
-      </div>
+      <SelectField
+        label="Mode"
+        options={observerPositionModes}
+        getOptionLabel={(option) =>
+          ({
+            currentPosition: "Current position",
+            manual: "Manual",
+          }[option])
+        }
+        value={mode}
+        onChange={setMode}
+      />
       <div>
         <label>Lat </label>
         <input

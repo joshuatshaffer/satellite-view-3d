@@ -1,28 +1,22 @@
 import { useAtom } from "jotai";
-import { isElementOf } from "../isElementOf";
 import { backgroundSettingAtom, backgroundSettingValues } from "../settings";
+import { SelectField } from "./SelectField";
 
 export function BackgroundSettingSelect() {
   const [background, setBackground] = useAtom(backgroundSettingAtom);
 
   return (
-    <div>
-      <label>Background </label>
-      <select
-        value={background}
-        onChange={(event) => {
-          const newValue = event.target.value;
-
-          if (!isElementOf(backgroundSettingValues, newValue)) {
-            throw new Error("Invalid background setting");
-          }
-
-          setBackground(newValue);
-        }}
-      >
-        <option value="none">None</option>
-        <option value="cameraPassthrough">Camera Passthrough</option>
-      </select>
-    </div>
+    <SelectField
+      label="Background"
+      options={backgroundSettingValues}
+      getOptionLabel={(option) =>
+        ({
+          none: "None",
+          cameraPassthrough: "Camera Passthrough",
+        }[option])
+      }
+      value={background}
+      onChange={setBackground}
+    />
   );
 }
