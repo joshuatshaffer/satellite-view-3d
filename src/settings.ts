@@ -26,6 +26,11 @@ export const dragScaleAtom = atomWithStorage(
   1
 );
 
+export const lookScaleAtom = atomWithStorage(
+  localStoragePrefix + "look-scale",
+  4
+);
+
 export const observerPositionModes = ["currentPosition", "manual"] as const;
 export type ObserverPositionMode = (typeof observerPositionModes)[number];
 

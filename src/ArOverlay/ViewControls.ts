@@ -24,7 +24,7 @@ export function ViewControls({
 
   const controlsMap = {
     drag: DragControls(camera, domElement, store),
-    look: LookControls(camera, domElement),
+    look: LookControls(camera, domElement, store),
     deviceOrientation: DeviceOrientationControls(camera),
   };
 

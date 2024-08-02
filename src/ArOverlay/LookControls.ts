@@ -1,14 +1,18 @@
-import { Camera } from "three";
+import { PerspectiveCamera } from "three";
+import { Store } from "../jotai-types";
 import { degToRad } from "../rotations";
+import { lookScaleAtom } from "../settings";
 import styles from "./LookControls.module.css";
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
 
-export function LookControls(camera: Camera, domElement: HTMLElement) {
-  const movementScale = 0.01;
-
+export function LookControls(
+  camera: PerspectiveCamera,
+  domElement: HTMLElement,
+  store: Store
+) {
   const maxElevation = degToRad(90);
   const minElevation = degToRad(-90);
 
@@ -31,14 +35,19 @@ export function LookControls(camera: Camera, domElement: HTMLElement) {
     const deltaClientY = event.clientY - prevClientY;
     prevClientX = event.clientX;
     prevClientY = event.clientY;
+    const lookScale = store.get(lookScaleAtom);
 
     camera.rotation.set(
       clamp(
-        camera.rotation.x - deltaClientY * movementScale,
+        camera.rotation.x -
+          (deltaClientY / window.innerHeight) *
+            degToRad(camera.fov) *
+            lookScale,
         minElevation,
         maxElevation
       ),
-      camera.rotation.y - deltaClientX * movementScale,
+      camera.rotation.y -
+        (deltaClientX / window.innerWidth) * degToRad(camera.fov) * lookScale,
       0,
       "YXZ"
     );
