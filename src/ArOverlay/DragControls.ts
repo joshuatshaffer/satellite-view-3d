@@ -1,5 +1,7 @@
 import { PerspectiveCamera } from "three";
+import { Store } from "../jotai-types";
 import { degToRad } from "../rotations";
+import { dragScaleAtom } from "../settings";
 import styles from "./DragControls.module.css";
 
 function clamp(value: number, min: number, max: number) {
@@ -8,7 +10,8 @@ function clamp(value: number, min: number, max: number) {
 
 export function DragControls(
   camera: PerspectiveCamera,
-  domElement: HTMLElement
+  domElement: HTMLElement,
+  store: Store
 ) {
   const maxElevation = degToRad(90);
   const minElevation = degToRad(-90);
@@ -32,16 +35,19 @@ export function DragControls(
     const deltaClientY = event.clientY - prevClientY;
     prevClientX = event.clientX;
     prevClientY = event.clientY;
+    const dragScale = store.get(dragScaleAtom);
 
     camera.rotation.set(
       clamp(
         camera.rotation.x +
-          (deltaClientY / window.innerHeight) * degToRad(camera.fov),
+          (deltaClientY / window.innerHeight) *
+            degToRad(camera.fov) *
+            dragScale,
         minElevation,
         maxElevation
       ),
       camera.rotation.y +
-        (deltaClientX / window.innerWidth) * degToRad(camera.fov),
+        (deltaClientX / window.innerWidth) * degToRad(camera.fov) * dragScale,
       0,
       "YXZ"
     );

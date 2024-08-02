@@ -25,6 +25,11 @@ export const viewControlSettingAtom = atomWithStorage<ViewControlSetting>(
   "drag"
 );
 
+export const dragScaleAtom = atomWithStorage(
+  localStoragePrefix + "drag-scale",
+  1
+);
+
 export const observerPositionModes = ["currentPosition", "manual"] as const;
 export type ObserverPositionMode = (typeof observerPositionModes)[number];
 
