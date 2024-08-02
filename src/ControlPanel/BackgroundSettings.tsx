@@ -2,7 +2,7 @@ import { useAtom } from "jotai";
 import { backgroundSettingAtom, backgroundSettingValues } from "../settings";
 import { SelectField } from "./SelectField";
 
-export function BackgroundSettingSelect() {
+export function BackgroundSettings() {
   const [background, setBackground] = useAtom(backgroundSettingAtom);
 
   return (

@@ -1,23 +1,21 @@
 import { useAtom } from "jotai";
 import {
   dragScaleAtom,
-  viewControlSettingAtom,
-  viewControlSettingValues,
+  viewControlModeAtom,
+  viewControlModes,
 } from "../settings";
 import { NumberField } from "./NumberField";
 import { SelectField } from "./SelectField";
 
-export function ViewControlSettingSelect() {
-  const [viewControlSetting, setViewControlSetting] = useAtom(
-    viewControlSettingAtom
-  );
+export function ViewControlSettings() {
+  const [viewControlMode, setViewControlMode] = useAtom(viewControlModeAtom);
   const [dragScale, setDragScale] = useAtom(dragScaleAtom);
 
   return (
     <>
       <SelectField
-        label="View Control"
-        options={viewControlSettingValues}
+        label="View Mode"
+        options={viewControlModes}
         getOptionLabel={(option) =>
           ({
             drag: "Drag",
@@ -25,11 +23,11 @@ export function ViewControlSettingSelect() {
             deviceOrientation: "Device Orientation",
           }[option])
         }
-        value={viewControlSetting}
-        onChange={setViewControlSetting}
+        value={viewControlMode}
+        onChange={setViewControlMode}
       />
 
-      {viewControlSetting === "drag" ? (
+      {viewControlMode === "drag" ? (
         <NumberField
           label="Drag Scale"
           value={dragScale}

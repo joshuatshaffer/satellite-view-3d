@@ -8,7 +8,7 @@ import {
 import { NumberField } from "./NumberField";
 import { SelectField } from "./SelectField";
 
-export function ObserverPosition() {
+export function ObserverPositionSettings() {
   const [mode, setMode] = useAtom(observerPositionModeAtom);
   const [{ latitude, longitude }, setPosition] = useAtom(observerPositionAtom);
 

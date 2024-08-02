@@ -1,6 +1,6 @@
 import { PerspectiveCamera } from "three";
 import { Store } from "../jotai-types";
-import { viewControlSettingAtom } from "../settings";
+import { viewControlModeAtom } from "../settings";
 import { DeviceOrientationControls } from "./DeviceOrientationControls";
 import { DragControls } from "./DragControls";
 import { LookControls } from "./LookControls";
@@ -30,7 +30,7 @@ export function ViewControls({
 
   const updateActiveControls = () => {
     activeControls?.disable();
-    activeControls = controlsMap[store.get(viewControlSettingAtom)];
+    activeControls = controlsMap[store.get(viewControlModeAtom)];
     activeControls?.enable();
   };
 
@@ -39,7 +39,7 @@ export function ViewControls({
   return {
     enable: () => {
       updateActiveControls();
-      unSub = store.sub(viewControlSettingAtom, updateActiveControls);
+      unSub = store.sub(viewControlModeAtom, updateActiveControls);
     },
 
     disable: () => {

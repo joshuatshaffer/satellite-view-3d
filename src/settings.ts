@@ -13,14 +13,10 @@ export const backgroundSettingAtom = atomWithStorage<BackgroundSetting>(
   "none"
 );
 
-export const viewControlSettingValues = [
-  "drag",
-  "look",
-  "deviceOrientation",
-] as const;
-export type ViewControlSetting = (typeof viewControlSettingValues)[number];
+export const viewControlModes = ["drag", "look", "deviceOrientation"] as const;
+export type ViewControlMode = (typeof viewControlModes)[number];
 
-export const viewControlSettingAtom = atomWithStorage<ViewControlSetting>(
+export const viewControlModeAtom = atomWithStorage<ViewControlMode>(
   localStoragePrefix + "view-control",
   "drag"
 );
