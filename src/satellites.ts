@@ -2,10 +2,12 @@ import * as satellite from "satellite.js";
 import {
   BufferAttribute,
   BufferGeometry,
+  Camera,
   Euler,
   Points,
   PointsMaterial,
   Scene,
+  Vector3,
 } from "three";
 import { CSS2DObject } from "three/examples/jsm/Addons.js";
 import styles from "./ArOverlay.module.css";
@@ -21,7 +23,7 @@ interface SatelliteDefinition {
   tle: Tle;
 }
 
-export function makeSatellites(scene: Scene, store: Store) {
+export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
   let definitions: SatelliteDefinition[] = [];
 
   let records = definitions.map((d) =>
@@ -89,7 +91,18 @@ export function makeSatellites(scene: Scene, store: Store) {
   });
 
   const updateLabels = () => {
-    let i = 0;
+    let i = 1;
+
+    if (hoveredSatellite !== undefined) {
+      labels[0].visible = true;
+      labels[0].element.textContent =
+        definitions[indexMap[hoveredSatellite]].displayName;
+      labels[0].position.set(
+        scenePositions[hoveredSatellite * 3],
+        scenePositions[hoveredSatellite * 3 + 1],
+        scenePositions[hoveredSatellite * 3 + 2]
+      );
+    }
 
     for (; i < labels.length && i < indexMap.length; i++) {
       labels[i].visible = true;
@@ -147,6 +160,47 @@ export function makeSatellites(scene: Scene, store: Store) {
 
   fetchSatelliteDefinitions();
 
+  let hoveredSatellite: number | undefined;
+
+  const onPointerMove = (event: PointerEvent): void => {
+    const x = (2 * event.clientX) / window.innerWidth - 1;
+    const y = 1 - (2 * event.clientY) / window.innerHeight;
+
+    const vector = new Vector3();
+
+    let closestIndex: number | undefined;
+    let closestDistance = Infinity;
+
+    for (let i = 0; i < indexMap.length; i++) {
+      vector
+        .set(
+          scenePositions[i * 3],
+          scenePositions[i * 3 + 1],
+          scenePositions[i * 3 + 2]
+        )
+        .project(camera);
+
+      const dx = vector.x - x;
+      const dy = vector.y - y;
+      const distance = dx * dx + dy * dy;
+
+      if (distance < 0.1 && distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = i;
+      }
+    }
+
+    console.log(
+      closestIndex !== undefined
+        ? definitions[indexMap[closestIndex]].displayName
+        : closestIndex
+    );
+
+    hoveredSatellite = closestIndex;
+  };
+
+  window.addEventListener("pointermove", onPointerMove);
+
   return {
     update: () => {
       updatePositions();
@@ -157,6 +211,7 @@ export function makeSatellites(scene: Scene, store: Store) {
       scene.remove(particles);
       particles.geometry.dispose();
       particles.material.dispose();
+      window.removeEventListener("pointermove", onPointerMove);
     },
   };
 }
