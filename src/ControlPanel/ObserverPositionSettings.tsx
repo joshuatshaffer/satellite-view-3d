@@ -1,5 +1,6 @@
 import { useAtom } from "jotai";
 import { degToDms, formatAngleUnits } from "../AngleUnits";
+import { coordinatesToGridCode } from "../MaidenheadLocator";
 import {
   observerPositionAtom,
   observerPositionModeAtom,
@@ -53,6 +54,7 @@ export function ObserverPositionSettings() {
       />
       <div>{formatAngleUnits(degToDms(latitude))}</div>
       <div>{formatAngleUnits(degToDms(longitude))}</div>
+      <div>{coordinatesToGridCode({ latitude, longitude })}</div>
     </fieldset>
   );
 }

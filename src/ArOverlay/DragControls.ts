@@ -1,12 +1,9 @@
 import { PerspectiveCamera } from "three";
+import { clamp } from "../clamp";
 import { Store } from "../jotai-types";
 import { degToRad } from "../rotations";
 import { dragScaleAtom } from "../settings";
 import styles from "./DragControls.module.css";
-
-function clamp(value: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, value));
-}
 
 export function DragControls(
   camera: PerspectiveCamera,
