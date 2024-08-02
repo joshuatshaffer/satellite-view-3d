@@ -4,6 +4,7 @@ import {
   BufferGeometry,
   Camera,
   Euler,
+  Matrix4,
   Points,
   PointsMaterial,
   Scene,
@@ -166,23 +167,29 @@ export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
     const x = (2 * event.clientX) / window.innerWidth - 1;
     const y = 1 - (2 * event.clientY) / window.innerHeight;
 
-    const vector = new Vector3();
-
     let closestIndex: number | undefined;
     let closestDistance = Infinity;
 
+    // Pre-compute the matrix for efficiency instead of using
+    // `satellitePosition.project(camera).sub(mousePosition)`.
+    const sceneSpaceToDisplacementFromPointer = new Matrix4()
+      .makeTranslation(-x, -y, 0)
+      .multiply(camera.projectionMatrix)
+      .multiply(camera.matrixWorldInverse);
+
+    const displacement = new Vector3();
+
     for (let i = 0; i < indexMap.length; i++) {
-      vector
+      displacement
         .set(
           scenePositions[i * 3],
           scenePositions[i * 3 + 1],
           scenePositions[i * 3 + 2]
         )
-        .project(camera);
+        .applyMatrix4(sceneSpaceToDisplacementFromPointer);
 
-      const dx = vector.x - x;
-      const dy = vector.y - y;
-      const distance = dx * dx + dy * dy;
+      const distance =
+        displacement.x * displacement.x + displacement.y * displacement.y;
 
       if (distance < 0.1 && distance < closestDistance) {
         closestDistance = distance;
