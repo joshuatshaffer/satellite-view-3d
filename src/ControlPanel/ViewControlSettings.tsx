@@ -30,6 +30,7 @@ export function ViewControlSettings() {
       {viewControlMode === "drag" ? (
         <NumberField
           label="Drag Scale"
+          step={0.25}
           value={dragScale}
           onChange={setDragScale}
         />
