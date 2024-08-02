@@ -13,8 +13,9 @@ export function ViewControlSettingSelect() {
       options={viewControlSettingValues}
       getOptionLabel={(option) =>
         ({
+          drag: "Drag",
+          look: "Look",
           deviceOrientation: "Device Orientation",
-          manual: "Manual",
         }[option])
       }
       value={viewControlSetting}

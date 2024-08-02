@@ -14,14 +14,15 @@ export const backgroundSettingAtom = atomWithStorage<BackgroundSetting>(
 );
 
 export const viewControlSettingValues = [
+  "drag",
+  "look",
   "deviceOrientation",
-  "manual",
 ] as const;
 export type ViewControlSetting = (typeof viewControlSettingValues)[number];
 
 export const viewControlSettingAtom = atomWithStorage<ViewControlSetting>(
   localStoragePrefix + "view-control",
-  "manual"
+  "drag"
 );
 
 export const observerPositionModes = ["currentPosition", "manual"] as const;

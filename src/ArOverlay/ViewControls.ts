@@ -1,7 +1,8 @@
-import { Camera } from "three";
+import { PerspectiveCamera } from "three";
 import { Store } from "../jotai-types";
 import { viewControlSettingAtom } from "../settings";
 import { DeviceOrientationControls } from "./DeviceOrientationControls";
+import { DragControls } from "./DragControls";
 import { LookControls } from "./LookControls";
 
 export function ViewControls({
@@ -9,7 +10,7 @@ export function ViewControls({
   domElement,
   store,
 }: {
-  camera: Camera;
+  camera: PerspectiveCamera;
   domElement: HTMLElement;
   store: Store;
 }) {
@@ -22,8 +23,9 @@ export function ViewControls({
     | undefined;
 
   const controlsMap = {
+    drag: DragControls(camera, domElement),
+    look: LookControls(camera, domElement),
     deviceOrientation: DeviceOrientationControls(camera),
-    manual: LookControls(camera, domElement),
   };
 
   const updateActiveControls = () => {
