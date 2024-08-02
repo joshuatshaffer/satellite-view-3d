@@ -1,5 +1,9 @@
 ## To Do
 
+- Zoom in/out.
+- Show status of geolocation.
+- Show status of device orientation.
+- Try to make device orientation work in iOS.
 - Select/filter satellites display.
 - Select a small number of satellites to "focus".
   - Focused satellites have a label, a path trace, and a direction pointer when not in view.
