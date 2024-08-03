@@ -96,6 +96,7 @@ export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
 
   const updateHoveredLabel = () => {
     if (hoveredSatelliteId === undefined) {
+      hoverLabel.visible = false;
       return;
     }
 
@@ -103,6 +104,7 @@ export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
     const definition = definitions.get(hoveredSatelliteId);
 
     if (index === undefined || definition === undefined) {
+      hoverLabel.visible = false;
       return;
     }
 
@@ -194,35 +196,50 @@ export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
   let hoveredSatelliteId: string | undefined;
 
   const onPointerMove = (event: PointerEvent): void => {
-    const x = (2 * event.clientX) / window.innerWidth - 1;
-    const y = 1 - (2 * event.clientY) / window.innerHeight;
+    const maxDistance = 10;
+    const maxDistanceSq = maxDistance * maxDistance;
 
     let closestIndex: number | undefined;
-    let closestDistance = Infinity;
+    let closestDistanceSq = Infinity;
 
     // Pre-compute the matrix for efficiency instead of using
-    // `satellitePosition.project(camera).sub(mousePosition)`.
-    const sceneSpaceToDisplacementFromPointer = new Matrix4()
-      .makeTranslation(-x, -y, 0)
+    // `satellitePosition.project(camera)`.
+    const sceneSpaceToNdc = new Matrix4()
       .multiply(camera.projectionMatrix)
       .multiply(camera.matrixWorldInverse);
 
-    const displacement = new Vector3();
+    const positionInNdc = new Vector3();
 
     for (let i = 0; i < indexToId.size; i++) {
-      displacement
+      positionInNdc
         .set(
           scenePositions[i * 3],
           scenePositions[i * 3 + 1],
           scenePositions[i * 3 + 2]
         )
-        .applyMatrix4(sceneSpaceToDisplacementFromPointer);
+        .applyMatrix4(sceneSpaceToNdc);
 
-      const distance =
-        displacement.x * displacement.x + displacement.y * displacement.y;
+      const isInView =
+        positionInNdc.z >= 0 &&
+        positionInNdc.z <= 1 &&
+        positionInNdc.x >= -1 &&
+        positionInNdc.x <= 1 &&
+        positionInNdc.y >= -1 &&
+        positionInNdc.y <= 1;
 
-      if (distance < 0.1 && distance < closestDistance) {
-        closestDistance = distance;
+      if (!isInView) {
+        continue;
+      }
+
+      const dx =
+        (1 + positionInNdc.x) * (window.innerWidth / 2) - event.clientX;
+      const dy =
+        (1 - positionInNdc.y) * (window.innerHeight / 2) - event.clientY;
+
+      const distanceSq = dx * dx + dy * dy;
+
+      if (distanceSq < maxDistanceSq && distanceSq < closestDistanceSq) {
+        closestDistanceSq = distanceSq;
         closestIndex = i;
       }
     }
