@@ -47,6 +47,13 @@ export function makeSatellites(
   );
   scene.add(particles);
 
+  const onUpdateScenePositions = () => {
+    geometry.setDrawRange(0, indexToId.size);
+    geometry.attributes.position.needsUpdate = true;
+
+    hoveredNeedsUpdate = true;
+  };
+
   const updatePositions = (nowDate = new Date()) => {
     const nowGmst = satellite.gstime(nowDate);
 
@@ -81,8 +88,7 @@ export function makeSatellites(
       idToIndex.set(id, index);
     }
 
-    geometry.setDrawRange(0, indexToId.size);
-    geometry.attributes.position.needsUpdate = true;
+    onUpdateScenePositions();
   };
 
   const makeLabel = () => {
@@ -153,6 +159,8 @@ export function makeSatellites(
       new PointsMaterial({ size: 2, color: 0xff0000, sizeAttenuation: false })
     );
     scene.add(particles);
+
+    onUpdateScenePositions();
   };
 
   const fetchSatelliteDefinitions = async () => {
@@ -174,6 +182,7 @@ export function makeSatellites(
   fetchSatelliteDefinitions();
 
   let hoveredSatelliteId: string | undefined;
+  let hoveredNeedsUpdate = false;
 
   const hoverLabel = makeLabel();
 
@@ -200,7 +209,17 @@ export function makeSatellites(
     );
   };
 
-  const onPointerMove = (event: PointerEvent): void => {
+  const updateHover = () => {
+    if (!hoveredNeedsUpdate) {
+      return;
+    }
+    hoveredNeedsUpdate = false;
+
+    if (!pointerPosition) {
+      hoveredSatelliteId = undefined;
+      return;
+    }
+
     const maxDistance = 10;
     const maxDistanceSq = maxDistance * maxDistance;
 
@@ -237,9 +256,11 @@ export function makeSatellites(
       }
 
       const dx =
-        (1 + positionInNdc.x) * (canvas.offsetWidth / 2) - event.offsetX;
+        (1 + positionInNdc.x) * (canvas.offsetWidth / 2) -
+        pointerPosition.offsetX;
       const dy =
-        (1 - positionInNdc.y) * (canvas.offsetHeight / 2) - event.offsetY;
+        (1 - positionInNdc.y) * (canvas.offsetHeight / 2) -
+        pointerPosition.offsetY;
 
       const distanceSq = dx * dx + dy * dy;
 
@@ -252,11 +273,40 @@ export function makeSatellites(
     hoveredSatelliteId = closestIndex ? indexToId.get(closestIndex) : undefined;
   };
 
+  let pointerPosition: { offsetX: number; offsetY: number } | undefined;
+
+  const setPointerPosition = (event: PointerEvent | undefined) => {
+    if (
+      pointerPosition?.offsetX === event?.offsetX &&
+      pointerPosition?.offsetY === event?.offsetY
+    ) {
+      return;
+    }
+
+    pointerPosition = event
+      ? {
+          offsetX: event.offsetX,
+          offsetY: event.offsetY,
+        }
+      : undefined;
+
+    hoveredNeedsUpdate = true;
+  };
+
+  const onPointerMove = (event: PointerEvent) => {
+    setPointerPosition(event);
+  };
+  const onPointerLeave = (_event: PointerEvent) => {
+    setPointerPosition(undefined);
+  };
+
   canvas.addEventListener("pointermove", onPointerMove);
+  canvas.addEventListener("pointerleave", onPointerLeave);
 
   return {
     update: () => {
       updatePositions();
+      updateHover();
       updateHoveredLabel();
       updateLabels();
     },
@@ -266,6 +316,7 @@ export function makeSatellites(
       particles.geometry.dispose();
       particles.material.dispose();
       canvas.removeEventListener("pointermove", onPointerMove);
+      canvas.removeEventListener("pointerleave", onPointerLeave);
     },
   };
 }
