@@ -97,31 +97,6 @@ export function makeSatellites(
     return label;
   };
 
-  const hoverLabel = makeLabel();
-
-  const updateHoveredLabel = () => {
-    if (hoveredSatelliteId === undefined) {
-      hoverLabel.visible = false;
-      return;
-    }
-
-    const index = idToIndex.get(hoveredSatelliteId);
-    const definition = definitions.get(hoveredSatelliteId);
-
-    if (index === undefined || definition === undefined) {
-      hoverLabel.visible = false;
-      return;
-    }
-
-    hoverLabel.visible = true;
-    hoverLabel.element.textContent = definition.displayName;
-    hoverLabel.position.set(
-      scenePositions[index * 3],
-      scenePositions[index * 3 + 1],
-      scenePositions[index * 3 + 2]
-    );
-  };
-
   const labels = Array.from({ length: 5 }, () => makeLabel());
 
   const updateLabels = () => {
@@ -199,6 +174,31 @@ export function makeSatellites(
   fetchSatelliteDefinitions();
 
   let hoveredSatelliteId: string | undefined;
+
+  const hoverLabel = makeLabel();
+
+  const updateHoveredLabel = () => {
+    if (hoveredSatelliteId === undefined) {
+      hoverLabel.visible = false;
+      return;
+    }
+
+    const index = idToIndex.get(hoveredSatelliteId);
+    const definition = definitions.get(hoveredSatelliteId);
+
+    if (index === undefined || definition === undefined) {
+      hoverLabel.visible = false;
+      return;
+    }
+
+    hoverLabel.visible = true;
+    hoverLabel.element.textContent = definition.displayName;
+    hoverLabel.position.set(
+      scenePositions[index * 3],
+      scenePositions[index * 3 + 1],
+      scenePositions[index * 3 + 2]
+    );
+  };
 
   const onPointerMove = (event: PointerEvent): void => {
     const maxDistance = 10;
