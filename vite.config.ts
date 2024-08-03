@@ -4,6 +4,7 @@ import { defineConfig } from "vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  clearScreen: false,
   plugins: [
     react(),
     // Need to have HTTPS to use the Geolocation API.

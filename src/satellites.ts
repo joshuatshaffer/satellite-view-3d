@@ -25,19 +25,16 @@ interface SatelliteDefinition {
 }
 
 export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
-  let definitions: SatelliteDefinition[] = [];
+  let definitions = new Map<string, SatelliteDefinition>();
+  let records = new Map<string, satellite.SatRec>();
 
-  let records = definitions.map((d) =>
-    satellite.twoline2satrec(d.tle[0], d.tle[1])
-  );
-
-  let indexMap: number[] = [];
-
-  let scenePositions = new Float32Array(3 * records.length);
+  let scenePositions = new Float32Array(3 * records.size);
+  let indexToId = new Map<number, string>();
+  let idToIndex = new Map<string, number>();
 
   let geometry = new BufferGeometry();
   geometry.setAttribute("position", new BufferAttribute(scenePositions, 3));
-  geometry.setDrawRange(0, indexMap.length);
+  geometry.setDrawRange(0, indexToId.size);
 
   let particles = new Points(
     geometry,
@@ -50,9 +47,10 @@ export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
 
     const observerGd = store.get(observerGdAtom);
 
-    indexMap = [];
-    for (let i = 0; i < records.length; i++) {
-      const positionAndVelocity = satellite.propagate(records[i], nowDate);
+    indexToId = new Map();
+    idToIndex = new Map();
+    for (const [id, record] of records) {
+      const positionAndVelocity = satellite.propagate(record, nowDate);
 
       const positionEci = positionAndVelocity.position;
 
@@ -64,22 +62,25 @@ export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
 
       const lookAngles = satellite.ecfToLookAngles(observerGd, positionEcf);
 
+      const index = indexToId.size;
+
       scenePositions.set(
         north()
           .applyEuler(lookAnglesToEuler(lookAngles))
           .multiplyScalar(100)
           .toArray(),
-        indexMap.length * 3
+        index * 3
       );
 
-      indexMap.push(i);
+      indexToId.set(index, id);
+      idToIndex.set(id, index);
     }
 
-    geometry.setDrawRange(0, indexMap.length);
+    geometry.setDrawRange(0, indexToId.size);
     geometry.attributes.position.needsUpdate = true;
   };
 
-  const labels = Array.from({ length: 5 }, () => {
+  const makeLabel = () => {
     const text = document.createElement("div");
     text.className = styles.label;
 
@@ -89,25 +90,42 @@ export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
     scene.add(label);
 
     return label;
-  });
+  };
 
-  const updateLabels = () => {
-    let i = 1;
+  const hoverLabel = makeLabel();
 
-    if (hoveredSatellite !== undefined) {
-      labels[0].visible = true;
-      labels[0].element.textContent =
-        definitions[indexMap[hoveredSatellite]].displayName;
-      labels[0].position.set(
-        scenePositions[hoveredSatellite * 3],
-        scenePositions[hoveredSatellite * 3 + 1],
-        scenePositions[hoveredSatellite * 3 + 2]
-      );
+  const updateHoveredLabel = () => {
+    if (hoveredSatelliteId === undefined) {
+      return;
     }
 
-    for (; i < labels.length && i < indexMap.length; i++) {
+    const index = idToIndex.get(hoveredSatelliteId);
+    const definition = definitions.get(hoveredSatelliteId);
+
+    if (index === undefined || definition === undefined) {
+      return;
+    }
+
+    hoverLabel.visible = true;
+    hoverLabel.element.textContent = definition.displayName;
+    hoverLabel.position.set(
+      scenePositions[index * 3],
+      scenePositions[index * 3 + 1],
+      scenePositions[index * 3 + 2]
+    );
+  };
+
+  const labels = Array.from({ length: 5 }, () => makeLabel());
+
+  const updateLabels = () => {
+    let i = 0;
+
+    for (; i < labels.length && i < indexToId.size; i++) {
+      const id = indexToId.get(i);
+      const definition = id ? definitions.get(id) : undefined;
+
       labels[i].visible = true;
-      labels[i].element.textContent = definitions[indexMap[i]].displayName;
+      labels[i].element.textContent = definition?.displayName ?? "";
       labels[i].position.set(
         scenePositions[i * 3],
         scenePositions[i * 3 + 1],
@@ -120,13 +138,25 @@ export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
     }
   };
 
-  const setSatellites = (newDefinitions: SatelliteDefinition[]) => {
-    definitions = newDefinitions;
-    records = definitions.map((d) =>
-      satellite.twoline2satrec(d.tle[0], d.tle[1])
-    );
+  const setSatellites = (newDefinitions: Iterable<SatelliteDefinition>) => {
+    definitions = new Map();
+    records = new Map();
 
-    scenePositions = new Float32Array(3 * records.length);
+    for (const definition of newDefinitions) {
+      const record = satellite.twoline2satrec(
+        definition.tle[0],
+        definition.tle[1]
+      );
+
+      const id = record.satnum;
+
+      definitions.set(id, definition);
+      records.set(id, record);
+    }
+
+    scenePositions = new Float32Array(3 * records.size);
+    indexToId = new Map();
+    idToIndex = new Map();
 
     scene.remove(particles);
     particles.geometry.dispose();
@@ -134,7 +164,7 @@ export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
 
     geometry = new BufferGeometry();
     geometry.setAttribute("position", new BufferAttribute(scenePositions, 3));
-    geometry.setDrawRange(0, indexMap.length);
+    geometry.setDrawRange(0, indexToId.size);
 
     particles = new Points(
       geometry,
@@ -161,7 +191,7 @@ export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
 
   fetchSatelliteDefinitions();
 
-  let hoveredSatellite: number | undefined;
+  let hoveredSatelliteId: string | undefined;
 
   const onPointerMove = (event: PointerEvent): void => {
     const x = (2 * event.clientX) / window.innerWidth - 1;
@@ -179,7 +209,7 @@ export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
 
     const displacement = new Vector3();
 
-    for (let i = 0; i < indexMap.length; i++) {
+    for (let i = 0; i < indexToId.size; i++) {
       displacement
         .set(
           scenePositions[i * 3],
@@ -197,13 +227,7 @@ export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
       }
     }
 
-    console.log(
-      closestIndex !== undefined
-        ? definitions[indexMap[closestIndex]].displayName
-        : closestIndex
-    );
-
-    hoveredSatellite = closestIndex;
+    hoveredSatelliteId = closestIndex ? indexToId.get(closestIndex) : undefined;
   };
 
   window.addEventListener("pointermove", onPointerMove);
@@ -211,6 +235,7 @@ export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
   return {
     update: () => {
       updatePositions();
+      updateHoveredLabel();
       updateLabels();
     },
 
