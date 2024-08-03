@@ -24,7 +24,12 @@ interface SatelliteDefinition {
   tle: Tle;
 }
 
-export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
+export function makeSatellites(
+  scene: Scene,
+  store: Store,
+  camera: Camera,
+  canvas: HTMLCanvasElement
+) {
   let definitions = new Map<string, SatelliteDefinition>();
   let records = new Map<string, satellite.SatRec>();
 
@@ -232,9 +237,9 @@ export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
       }
 
       const dx =
-        (1 + positionInNdc.x) * (window.innerWidth / 2) - event.clientX;
+        (1 + positionInNdc.x) * (canvas.offsetWidth / 2) - event.offsetX;
       const dy =
-        (1 - positionInNdc.y) * (window.innerHeight / 2) - event.clientY;
+        (1 - positionInNdc.y) * (canvas.offsetHeight / 2) - event.offsetY;
 
       const distanceSq = dx * dx + dy * dy;
 
@@ -247,7 +252,7 @@ export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
     hoveredSatelliteId = closestIndex ? indexToId.get(closestIndex) : undefined;
   };
 
-  window.addEventListener("pointermove", onPointerMove);
+  canvas.addEventListener("pointermove", onPointerMove);
 
   return {
     update: () => {
@@ -260,7 +265,7 @@ export function makeSatellites(scene: Scene, store: Store, camera: Camera) {
       scene.remove(particles);
       particles.geometry.dispose();
       particles.material.dispose();
-      window.removeEventListener("pointermove", onPointerMove);
+      canvas.removeEventListener("pointermove", onPointerMove);
     },
   };
 }
