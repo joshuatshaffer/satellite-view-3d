@@ -45,7 +45,7 @@ export function initAr({
   labelRenderer.domElement.style.top = "0px";
   labelRenderer.domElement.style.pointerEvents = "none";
 
-  const viewControls = ViewControls({ camera, domElement: canvas, store });
+  const viewControls = ViewControls({ camera, canvas, store });
   viewControls.enable();
 
   scene.add(makeGrid());

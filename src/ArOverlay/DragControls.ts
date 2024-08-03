@@ -7,7 +7,7 @@ import styles from "./DragControls.module.css";
 
 export function DragControls(
   camera: PerspectiveCamera,
-  domElement: HTMLElement,
+  canvas: HTMLElement,
   store: Store
 ) {
   const maxElevation = degToRad(90);
@@ -20,11 +20,11 @@ export function DragControls(
     prevClientX = event.clientX;
     prevClientY = event.clientY;
 
-    domElement.setPointerCapture(event.pointerId);
+    canvas.setPointerCapture(event.pointerId);
 
-    domElement.addEventListener("pointermove", onPointerMove);
-    domElement.addEventListener("pointerup", onPointerUp);
-    domElement.classList.add(styles.dragControlsActive);
+    canvas.addEventListener("pointermove", onPointerMove);
+    canvas.addEventListener("pointerup", onPointerUp);
+    canvas.classList.add(styles.dragControlsActive);
   };
 
   const onPointerMove = (event: PointerEvent) => {
@@ -51,25 +51,22 @@ export function DragControls(
   };
 
   const onPointerUp = (_event: PointerEvent) => {
-    domElement.removeEventListener("pointermove", onPointerMove);
-    domElement.removeEventListener("pointerup", onPointerUp);
-    domElement.classList.remove(styles.dragControlsActive);
+    canvas.removeEventListener("pointermove", onPointerMove);
+    canvas.removeEventListener("pointerup", onPointerUp);
+    canvas.classList.remove(styles.dragControlsActive);
   };
 
   return {
     enable: () => {
-      domElement.addEventListener("pointerdown", onPointerDown);
-      domElement.classList.add(styles.dragControls);
+      canvas.addEventListener("pointerdown", onPointerDown);
+      canvas.classList.add(styles.dragControls);
     },
 
     disable: () => {
-      domElement.removeEventListener("pointerdown", onPointerDown);
-      domElement.removeEventListener("pointermove", onPointerMove);
-      domElement.removeEventListener("pointerup", onPointerUp);
-      domElement.classList.remove(
-        styles.dragControls,
-        styles.dragControlsActive
-      );
+      canvas.removeEventListener("pointerdown", onPointerDown);
+      canvas.removeEventListener("pointermove", onPointerMove);
+      canvas.removeEventListener("pointerup", onPointerUp);
+      canvas.classList.remove(styles.dragControls, styles.dragControlsActive);
     },
   };
 }

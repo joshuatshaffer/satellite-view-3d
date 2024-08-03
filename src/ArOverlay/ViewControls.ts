@@ -7,11 +7,11 @@ import { LookControls } from "./LookControls";
 
 export function ViewControls({
   camera,
-  domElement,
+  canvas,
   store,
 }: {
   camera: PerspectiveCamera;
-  domElement: HTMLElement;
+  canvas: HTMLElement;
   store: Store;
 }) {
   let activeControls:
@@ -23,8 +23,8 @@ export function ViewControls({
     | undefined;
 
   const controlsMap = {
-    drag: DragControls(camera, domElement, store),
-    look: LookControls(camera, domElement, store),
+    drag: DragControls(camera, canvas, store),
+    look: LookControls(camera, canvas, store),
     deviceOrientation: DeviceOrientationControls(camera),
   };
 

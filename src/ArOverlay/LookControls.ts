@@ -7,7 +7,7 @@ import styles from "./LookControls.module.css";
 
 export function LookControls(
   camera: PerspectiveCamera,
-  domElement: HTMLElement,
+  canvas: HTMLElement,
   store: Store
 ) {
   const maxElevation = degToRad(90);
@@ -20,11 +20,11 @@ export function LookControls(
     prevClientX = event.clientX;
     prevClientY = event.clientY;
 
-    domElement.setPointerCapture(event.pointerId);
+    canvas.setPointerCapture(event.pointerId);
 
-    domElement.addEventListener("pointermove", onPointerMove);
-    domElement.addEventListener("pointerup", onPointerUp);
-    domElement.classList.add(styles.lookControlsActive);
+    canvas.addEventListener("pointermove", onPointerMove);
+    canvas.addEventListener("pointerup", onPointerUp);
+    canvas.classList.add(styles.lookControlsActive);
   };
 
   const onPointerMove = (event: PointerEvent) => {
@@ -51,25 +51,22 @@ export function LookControls(
   };
 
   const onPointerUp = (_event: PointerEvent) => {
-    domElement.removeEventListener("pointermove", onPointerMove);
-    domElement.removeEventListener("pointerup", onPointerUp);
-    domElement.classList.remove(styles.lookControlsActive);
+    canvas.removeEventListener("pointermove", onPointerMove);
+    canvas.removeEventListener("pointerup", onPointerUp);
+    canvas.classList.remove(styles.lookControlsActive);
   };
 
   return {
     enable: () => {
-      domElement.addEventListener("pointerdown", onPointerDown);
-      domElement.classList.add(styles.lookControls);
+      canvas.addEventListener("pointerdown", onPointerDown);
+      canvas.classList.add(styles.lookControls);
     },
 
     disable: () => {
-      domElement.removeEventListener("pointerdown", onPointerDown);
-      domElement.removeEventListener("pointermove", onPointerMove);
-      domElement.removeEventListener("pointerup", onPointerUp);
-      domElement.classList.remove(
-        styles.lookControls,
-        styles.lookControlsActive
-      );
+      canvas.removeEventListener("pointerdown", onPointerDown);
+      canvas.removeEventListener("pointermove", onPointerMove);
+      canvas.removeEventListener("pointerup", onPointerUp);
+      canvas.classList.remove(styles.lookControls, styles.lookControlsActive);
     },
   };
 }

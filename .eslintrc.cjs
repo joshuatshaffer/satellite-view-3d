@@ -11,5 +11,7 @@ module.exports = {
       { allowConstantExport: true },
     ],
     "@typescript-eslint/method-signature-style": "warn",
+    "object-shorthand": "warn",
+    "no-useless-rename": "warn",
   },
 };
