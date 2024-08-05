@@ -32,19 +32,16 @@ export function LookControls(
     const deltaClientY = event.clientY - prevClientY;
     prevClientX = event.clientX;
     prevClientY = event.clientY;
-    const lookScale = store.get(lookScaleAtom);
+
+    const scale = degToRad(camera.getEffectiveFOV()) * store.get(lookScaleAtom);
 
     camera.rotation.set(
       clamp(
-        camera.rotation.x -
-          (deltaClientY / window.innerHeight) *
-            degToRad(camera.fov) *
-            lookScale,
+        camera.rotation.x - (deltaClientY / window.innerHeight) * scale,
         minElevation,
         maxElevation
       ),
-      camera.rotation.y -
-        (deltaClientX / window.innerWidth) * degToRad(camera.fov) * lookScale,
+      camera.rotation.y - (deltaClientX / window.innerWidth) * scale,
       0,
       "YXZ"
     );

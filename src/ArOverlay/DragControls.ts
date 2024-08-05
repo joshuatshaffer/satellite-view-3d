@@ -32,19 +32,16 @@ export function DragControls(
     const deltaClientY = event.clientY - prevClientY;
     prevClientX = event.clientX;
     prevClientY = event.clientY;
-    const dragScale = store.get(dragScaleAtom);
+
+    const scale = degToRad(camera.getEffectiveFOV()) * store.get(dragScaleAtom);
 
     camera.rotation.set(
       clamp(
-        camera.rotation.x +
-          (deltaClientY / window.innerHeight) *
-            degToRad(camera.fov) *
-            dragScale,
+        camera.rotation.x + (deltaClientY / window.innerHeight) * scale,
         minElevation,
         maxElevation
       ),
-      camera.rotation.y +
-        (deltaClientX / window.innerWidth) * degToRad(camera.fov) * dragScale,
+      camera.rotation.y + (deltaClientX / window.innerWidth) * scale,
       0,
       "YXZ"
     );

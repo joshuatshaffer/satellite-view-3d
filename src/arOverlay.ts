@@ -7,6 +7,7 @@ import {
 import styles from "./ArOverlay.module.css";
 import { ViewControls } from "./ArOverlay/ViewControls";
 import { makeGrid } from "./grid";
+import { makeInputs } from "./inputs";
 import { Store } from "./jotai-types";
 import { makeSatellites } from "./satellites";
 import { down, east, north, south, up, west } from "./sceneSpaceDirections";
@@ -33,6 +34,8 @@ export function initAr({
     0.1,
     1000
   );
+
+  const inputs = makeInputs(canvas, camera);
 
   const renderer = new WebGLRenderer({ canvas, alpha: true });
   renderer.setClearColor(0x000000, 0);
@@ -92,6 +95,7 @@ export function initAr({
 
   return () => {
     console.log("Cleaning up AR overlay");
+    inputs.dispose();
     viewControls.disable();
     satellites.dispose();
     renderer.setAnimationLoop(null);
