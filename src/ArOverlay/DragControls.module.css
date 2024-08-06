@@ -1,9 +1,0 @@
-.dragControls {
-  touch-action: none;
-  user-select: none;
-  cursor: grab;
-}
-
-.dragControlsActive {
-  cursor: grabbing;
-}

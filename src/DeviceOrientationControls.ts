@@ -1,7 +1,7 @@
 import { Camera } from "three";
-import { deviceOrientationToCameraQuaternion } from "../rotations";
+import { deviceOrientationToCameraQuaternion } from "./rotations";
 
-export function DeviceOrientationControls(camera: Camera) {
+export function makeDeviceOrientationControls(camera: Camera) {
   let deviceOrientation: DeviceOrientationEvent | undefined;
 
   const onDeviceOrientation = (event: DeviceOrientationEvent) => {

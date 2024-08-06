@@ -1,6 +1,6 @@
-import eruda from "eruda";
-
-eruda.init();
+if (process.env.NODE_ENV === "development") {
+  import("eruda").then(({ default: eruda }) => eruda.init());
+}
 
 import React from "react";
 import ReactDOM from "react-dom/client";

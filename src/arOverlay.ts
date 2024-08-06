@@ -5,12 +5,23 @@ import {
   CSS2DRenderer,
 } from "three/addons/renderers/CSS2DRenderer.js";
 import styles from "./ArOverlay.module.css";
-import { ViewControls } from "./ArOverlay/ViewControls";
+import { clamp } from "./clamp";
+import { makeDeviceOrientationControls } from "./DeviceOrientationControls";
+import { fetchSatelliteDefinitions } from "./fetchSatelliteDefinitions";
 import { makeGrid } from "./grid";
-import { makeInputs } from "./inputs";
+import { makeInputs, PointerPosition } from "./inputs";
 import { Store } from "./jotai-types";
-import { makeSatellites } from "./satellites";
+import { degToRad } from "./rotations";
+import { satelliteAtPointer } from "./satelliteAtPointer";
+import { SatelliteDefinitions } from "./SatelliteDefinitions";
+import { SatellitePoints } from "./SatellitePoints";
+import { SatellitePositions } from "./SatellitePositions";
 import { down, east, north, south, up, west } from "./sceneSpaceDirections";
+import { dragScaleAtom, lookScaleAtom, viewControlModeAtom } from "./settings";
+import { Time } from "./Time";
+
+const maxElevation = degToRad(90);
+const minElevation = degToRad(-90);
 
 export function initAr({
   canvas,
@@ -35,8 +46,6 @@ export function initAr({
     1000
   );
 
-  const inputs = makeInputs(canvas, camera);
-
   const renderer = new WebGLRenderer({ canvas, alpha: true });
   renderer.setClearColor(0x000000, 0);
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -47,9 +56,6 @@ export function initAr({
   labelRenderer.domElement.style.position = "absolute";
   labelRenderer.domElement.style.top = "0px";
   labelRenderer.domElement.style.pointerEvents = "none";
-
-  const viewControls = ViewControls({ camera, canvas, store });
-  viewControls.enable();
 
   scene.add(makeGrid());
 
@@ -72,7 +78,217 @@ export function initAr({
     scene.add(label);
   }
 
-  const satellites = makeSatellites(scene, store, camera, canvas);
+  let selectedSatelliteId: string | undefined;
+
+  const onClick = (pointerPosition: PointerPosition) => {
+    selectedSatelliteId = satelliteAtPointer({
+      satellitePositions,
+      pointerPosition,
+      camera,
+      canvas,
+    });
+
+    console.log("Selected satellite", selectedSatelliteId);
+  };
+
+  let zoom = 1;
+
+  const deviceOrientationControls = makeDeviceOrientationControls(camera);
+
+  const updateActiveControls = () => {
+    const viewControlMode = store.get(viewControlModeAtom);
+
+    if (viewControlMode === "deviceOrientation") {
+      deviceOrientationControls.enable();
+    } else {
+      deviceOrientationControls.disable();
+    }
+  };
+
+  updateActiveControls();
+  const unsubscribeViewControlModeAtom = store.sub(
+    viewControlModeAtom,
+    updateActiveControls
+  );
+
+  const onZoom = (delta: number) => {
+    zoom = clamp(zoom - delta * 0.001, 1, 10);
+
+    camera.zoom = zoom * zoom;
+    camera.updateProjectionMatrix();
+  };
+
+  const inputs = makeInputs(canvas, {
+    onDrag: ({ from, to, pinchingWith }) => {
+      const viewControlMode = store.get(viewControlModeAtom);
+
+      if (viewControlMode === "drag") {
+        const scale =
+          degToRad(camera.getEffectiveFOV()) * store.get(dragScaleAtom);
+
+        camera.rotation.set(
+          clamp(
+            camera.rotation.x +
+              ((to.offsetY - from.offsetY) / window.innerHeight) * scale,
+            minElevation,
+            maxElevation
+          ),
+          camera.rotation.y +
+            ((to.offsetX - from.offsetX) / window.innerWidth) * scale,
+          0,
+          "YXZ"
+        );
+      } else if (viewControlMode === "look") {
+        const scale =
+          degToRad(camera.getEffectiveFOV()) * store.get(lookScaleAtom);
+
+        camera.rotation.set(
+          clamp(
+            camera.rotation.x -
+              ((to.offsetY - from.offsetY) / window.innerHeight) * scale,
+            minElevation,
+            maxElevation
+          ),
+          camera.rotation.y -
+            ((to.offsetX - from.offsetX) / window.innerWidth) * scale,
+          0,
+          "YXZ"
+        );
+      }
+
+      if (pinchingWith) {
+        const fromDx = from.offsetX - pinchingWith.offsetX;
+        const fromDy = from.offsetY - pinchingWith.offsetY;
+        const toDx = to.offsetX - pinchingWith.offsetX;
+        const toDy = to.offsetY - pinchingWith.offsetY;
+        const fromDistance = Math.sqrt(fromDx * fromDx + fromDy * fromDy);
+        const toDistance = Math.sqrt(toDx * toDx + toDy * toDy);
+
+        onZoom((fromDistance - toDistance) * 5);
+      }
+    },
+    onClick,
+    onZoom,
+  });
+
+  const time = new Time();
+
+  const satelliteDefinitions = new SatelliteDefinitions();
+
+  fetchSatelliteDefinitions().then((definitions) => {
+    satelliteDefinitions.setSatellites(definitions);
+  });
+
+  const satellitePositions = new SatellitePositions(
+    time,
+    satelliteDefinitions,
+    store
+  );
+
+  const satellitePoints = new SatellitePoints(satellitePositions);
+  scene.add(satellitePoints.points);
+
+  const makeLabel = () => {
+    const text = document.createElement("div");
+    text.className = styles.label;
+
+    const label = new CSS2DObject(text);
+    label.center.set(0, 0);
+
+    scene.add(label);
+
+    return label;
+  };
+
+  const hoverLabel = makeLabel();
+
+  const updateHoveredLabel = (hoveredSatelliteId: string | undefined) => {
+    if (hoveredSatelliteId === undefined) {
+      hoverLabel.visible = false;
+      return;
+    }
+
+    const index = satellitePositions.idToIndex.get(hoveredSatelliteId);
+    const definition = satelliteDefinitions.definitions.get(hoveredSatelliteId);
+
+    if (index === undefined || definition === undefined) {
+      hoverLabel.visible = false;
+      return;
+    }
+
+    hoverLabel.visible = true;
+    hoverLabel.element.textContent = definition.displayName;
+    hoverLabel.position.set(
+      satellitePositions.scenePositions[index * 3],
+      satellitePositions.scenePositions[index * 3 + 1],
+      satellitePositions.scenePositions[index * 3 + 2]
+    );
+  };
+
+  const updateHover = () => {
+    const inputState = inputs.getInputState();
+    const pointerPosition =
+      inputState.mightClick ?? inputState.hoveringPointers[0];
+
+    const hoveredSatelliteId = pointerPosition
+      ? satelliteAtPointer({
+          pointerPosition,
+          satellitePositions,
+          camera,
+          canvas,
+        })
+      : undefined;
+
+    updateHoveredLabel(hoveredSatelliteId);
+
+    if (hoveredSatelliteId) {
+      canvas.style.cursor = "pointer";
+    } else {
+      const viewControlMode = store.get(viewControlModeAtom);
+
+      if (viewControlMode === "drag") {
+        if (inputState.downPointers.length > 0) {
+          canvas.style.cursor = "grabbing";
+        } else {
+          canvas.style.cursor = "grab";
+        }
+      } else if (viewControlMode === "look") {
+        if (inputState.downPointers.length > 0) {
+          canvas.style.cursor = "none";
+        } else {
+          canvas.style.cursor = "move";
+        }
+      } else {
+        canvas.style.cursor = "default";
+      }
+    }
+  };
+
+  const selectedSatelliteLabel = makeLabel();
+
+  const updateSelectedSatelliteLabel = () => {
+    if (selectedSatelliteId === undefined) {
+      selectedSatelliteLabel.visible = false;
+      return;
+    }
+
+    const index = satellitePositions.idToIndex.get(selectedSatelliteId);
+    const definition =
+      satelliteDefinitions.definitions.get(selectedSatelliteId);
+
+    if (index === undefined || definition === undefined) {
+      selectedSatelliteLabel.visible = false;
+      return;
+    }
+
+    selectedSatelliteLabel.visible = true;
+    selectedSatelliteLabel.element.textContent = definition.displayName;
+    selectedSatelliteLabel.position.set(
+      satellitePositions.scenePositions[index * 3],
+      satellitePositions.scenePositions[index * 3 + 1],
+      satellitePositions.scenePositions[index * 3 + 2]
+    );
+  };
 
   const onWindowResize = () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -81,12 +297,17 @@ export function initAr({
     renderer.setSize(window.innerWidth, window.innerHeight);
     labelRenderer.setSize(window.innerWidth, window.innerHeight);
   };
+
   window.addEventListener("resize", onWindowResize);
 
   function animate() {
-    viewControls.update();
+    time.update();
+    satellitePositions.update();
+    satellitePoints.update();
+    updateHover();
+    updateSelectedSatelliteLabel();
+    deviceOrientationControls.update();
 
-    satellites.update();
     stats.update();
 
     renderer.render(scene, camera);
@@ -95,9 +316,15 @@ export function initAr({
 
   return () => {
     console.log("Cleaning up AR overlay");
+
     inputs.dispose();
-    viewControls.disable();
-    satellites.dispose();
+    unsubscribeViewControlModeAtom();
+    deviceOrientationControls.disable();
+
+    scene.remove(satellitePoints.points);
+    satellitePoints.dispose();
+    satellitePositions.dispose();
+
     renderer.setAnimationLoop(null);
     renderer.dispose();
     stats.dom.remove();
