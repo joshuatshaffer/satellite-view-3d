@@ -188,7 +188,7 @@ export function initAr({
   const satellitePoints = new SatellitePoints(satellitePositions);
   scene.add(satellitePoints.points);
 
-  const makeLabel = () => {
+  const makeSatelliteLabel = () => {
     const text = document.createElement("div");
     text.className = styles.label;
 
@@ -197,33 +197,33 @@ export function initAr({
 
     scene.add(label);
 
-    return label;
+    const update = (satelliteId: string | undefined) => {
+      if (satelliteId === undefined) {
+        label.visible = false;
+        return;
+      }
+
+      const index = satellitePositions.idToIndex.get(satelliteId);
+      const definition = satelliteDefinitions.definitions.get(satelliteId);
+
+      if (index === undefined || definition === undefined) {
+        label.visible = false;
+        return;
+      }
+
+      label.visible = true;
+      label.element.textContent = definition.displayName;
+      label.position.set(
+        satellitePositions.scenePositions[index * 3],
+        satellitePositions.scenePositions[index * 3 + 1],
+        satellitePositions.scenePositions[index * 3 + 2]
+      );
+    };
+
+    return { update };
   };
 
-  const hoverLabel = makeLabel();
-
-  const updateHoveredLabel = (hoveredSatelliteId: string | undefined) => {
-    if (hoveredSatelliteId === undefined) {
-      hoverLabel.visible = false;
-      return;
-    }
-
-    const index = satellitePositions.idToIndex.get(hoveredSatelliteId);
-    const definition = satelliteDefinitions.definitions.get(hoveredSatelliteId);
-
-    if (index === undefined || definition === undefined) {
-      hoverLabel.visible = false;
-      return;
-    }
-
-    hoverLabel.visible = true;
-    hoverLabel.element.textContent = definition.displayName;
-    hoverLabel.position.set(
-      satellitePositions.scenePositions[index * 3],
-      satellitePositions.scenePositions[index * 3 + 1],
-      satellitePositions.scenePositions[index * 3 + 2]
-    );
-  };
+  const hoverLabel = makeSatelliteLabel();
 
   const updateHover = () => {
     const inputState = inputs.getInputState();
@@ -239,7 +239,7 @@ export function initAr({
         })
       : undefined;
 
-    updateHoveredLabel(hoveredSatelliteId);
+    hoverLabel.update(hoveredSatelliteId);
 
     if (hoveredSatelliteId) {
       canvas.style.cursor = "pointer";
@@ -264,31 +264,7 @@ export function initAr({
     }
   };
 
-  const selectedSatelliteLabel = makeLabel();
-
-  const updateSelectedSatelliteLabel = () => {
-    if (selectedSatelliteId === undefined) {
-      selectedSatelliteLabel.visible = false;
-      return;
-    }
-
-    const index = satellitePositions.idToIndex.get(selectedSatelliteId);
-    const definition =
-      satelliteDefinitions.definitions.get(selectedSatelliteId);
-
-    if (index === undefined || definition === undefined) {
-      selectedSatelliteLabel.visible = false;
-      return;
-    }
-
-    selectedSatelliteLabel.visible = true;
-    selectedSatelliteLabel.element.textContent = definition.displayName;
-    selectedSatelliteLabel.position.set(
-      satellitePositions.scenePositions[index * 3],
-      satellitePositions.scenePositions[index * 3 + 1],
-      satellitePositions.scenePositions[index * 3 + 2]
-    );
-  };
+  const selectedSatelliteLabel = makeSatelliteLabel();
 
   const onWindowResize = () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -305,7 +281,7 @@ export function initAr({
     satellitePositions.update();
     satellitePoints.update();
     updateHover();
-    updateSelectedSatelliteLabel();
+    selectedSatelliteLabel.update(selectedSatelliteId);
     deviceOrientationControls.update();
 
     stats.update();
