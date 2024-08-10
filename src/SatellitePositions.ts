@@ -1,8 +1,7 @@
 import * as satellite from "satellite.js";
-import { Euler } from "three";
 import { Store } from "./jotai-types";
+import { lookAnglesToPosition } from "./lookAnglesToPosition";
 import { SatelliteDefinitions } from "./SatelliteDefinitions";
-import { north } from "./sceneSpaceDirections";
 import { observerGdAtom } from "./settings";
 import { Time } from "./Time";
 
@@ -76,10 +75,7 @@ export class SatellitePositions {
       const index = this.indexToId.size;
 
       this.scenePositions.set(
-        north()
-          .applyEuler(lookAnglesToEuler(lookAngles))
-          .multiplyScalar(100)
-          .toArray(),
+        lookAnglesToPosition(lookAngles).toArray(),
         index * 3
       );
 
@@ -91,8 +87,4 @@ export class SatellitePositions {
       dependent.needsUpdate = true;
     }
   }
-}
-
-function lookAnglesToEuler(lookAngles: satellite.LookAngles) {
-  return new Euler(lookAngles.elevation, -lookAngles.azimuth, 0, "YXZ");
 }

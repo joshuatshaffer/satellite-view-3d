@@ -9,6 +9,7 @@ import { clamp } from "./clamp";
 import { makeDeviceOrientationControls } from "./DeviceOrientationControls";
 import { fetchSatelliteDefinitions } from "./fetchSatelliteDefinitions";
 import { makeGrid } from "./grid";
+import { makeGridLabels } from "./gridLabels";
 import { makeInputs, PointerPosition } from "./inputs";
 import { Store } from "./jotai-types";
 import { degToRad } from "./rotations";
@@ -58,6 +59,8 @@ export function initAr({
   labelRenderer.domElement.style.pointerEvents = "none";
 
   scene.add(makeGrid());
+
+  const gridLabels = makeGridLabels(scene, camera);
 
   for (const { text, position } of [
     { text: "North", position: north() },
@@ -283,6 +286,8 @@ export function initAr({
     updateHover();
     selectedSatelliteLabel.update(selectedSatelliteId);
     deviceOrientationControls.update();
+
+    gridLabels.update();
 
     stats.update();
 

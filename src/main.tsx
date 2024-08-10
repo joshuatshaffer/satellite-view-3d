@@ -1,7 +1,3 @@
-if (process.env.NODE_ENV === "development") {
-  import("eruda").then(({ default: eruda }) => eruda.init());
-}
-
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { App } from "./App.tsx";
