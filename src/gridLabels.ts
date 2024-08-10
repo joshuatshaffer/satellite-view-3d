@@ -32,26 +32,10 @@ function deviceCoordinatesToLookAngles(
 const debugElement = document.getElementById("debug")!;
 
 export function makeGridLabels(scene: Scene, camera: PerspectiveCamera) {
-  const makeLabel = () => {
-    const text = document.createElement("div");
-    text.className = styles.label;
-
-    const label = new CSS2DObject(text);
-    label.center.set(0, 1);
-
-    scene.add(label);
-
-    return {
-      text,
-      label,
-    };
-  };
-
-  const labels = Array.from({ length: 4 }, makeLabel);
-
-  const bar = makeLabel();
+  const labelPool = makeLabelPool(scene);
 
   const update = () => {
+    labelPool.reset();
     camera.updateMatrixWorld();
 
     const points = {
@@ -68,41 +52,66 @@ export function makeGridLabels(scene: Scene, camera: PerspectiveCamera) {
       bottomRight: deviceCoordinatesToLookAngles(camera, new Vector3(1, -1, 0)),
     };
 
-    const elevation = degToRad(-60);
+    for (const elevation of [
+      degToRad(-60),
+      degToRad(-30),
+      0,
+      degToRad(30),
+      degToRad(60),
+    ]) {
+      if (
+        points.bottomLeft.elevation < elevation !==
+        points.bottomCenter.elevation < elevation
+      ) {
+        const r = findRoot(
+          (azimuth) =>
+            distanceToViewEdge(
+              camera,
+              lookAnglesToPosition({ azimuth, elevation })
+            ),
+          points.bottomLeft.azimuth,
+          points.bottomCenter.azimuth
+        );
 
-    for (let i = 0; i < labels.length; i++) {
-      const azimuth = degToRad(i * 90);
+        labelPool.place(
+          lookAnglesToPosition({ azimuth: r, elevation }),
+          radToDeg(elevation).toFixed(2)
+        );
+        labelPool.place(
+          lookAnglesToPosition({
+            azimuth: 2 * points.bottomCenter.azimuth - r,
+            elevation,
+          }),
+          radToDeg(elevation).toFixed(2)
+        );
+      }
 
-      const position = lookAnglesToPosition({ azimuth, elevation });
+      if (
+        points.bottomLeft.elevation < elevation !==
+        points.centerLeft.elevation < elevation
+      ) {
+        const r = findRoot(
+          (azimuth) =>
+            distanceToViewEdge(
+              camera,
+              lookAnglesToPosition({ azimuth, elevation })
+            ),
+          points.bottomLeft.azimuth,
+          points.centerLeft.azimuth
+        );
 
-      const distance = distanceToViewEdge(camera, position);
-
-      labels[i].label.position.copy(position);
-      labels[i].text.textContent = `${distance} (${azimuth.toFixed(
-        2
-      )}, ${elevation.toFixed(2)})`;
-    }
-
-    const foo =
-      points.bottomLeft.elevation < elevation !==
-      points.bottomCenter.elevation < elevation;
-
-    if (foo) {
-      const r = findRoot(
-        (azimuth) =>
-          distanceToViewEdge(
-            camera,
-            lookAnglesToPosition({ azimuth, elevation })
-          ),
-        points.bottomLeft.azimuth,
-        points.bottomCenter.azimuth
-      );
-
-      bar.label.visible = true;
-      bar.text.textContent = radToDeg(elevation).toFixed(2);
-      bar.label.position.copy(lookAnglesToPosition({ azimuth: r, elevation }));
-    } else {
-      bar.label.visible = false;
+        labelPool.place(
+          lookAnglesToPosition({ azimuth: r, elevation }),
+          radToDeg(elevation).toFixed(2)
+        );
+        labelPool.place(
+          lookAnglesToPosition({
+            azimuth: 2 * points.bottomCenter.azimuth - r,
+            elevation,
+          }),
+          radToDeg(elevation).toFixed(2)
+        );
+      }
     }
 
     debugElement.textContent = JSON.stringify(
@@ -113,7 +122,6 @@ export function makeGridLabels(scene: Scene, camera: PerspectiveCamera) {
             { azimuth: radToDeg(azimuth), elevation: radToDeg(elevation) },
           ])
         ),
-        foo,
       },
       null,
       2
@@ -141,4 +149,53 @@ function findRoot(
     [x0, x1] = [x1, x];
   }
   return x!;
+}
+
+function makeLabelPool(scene: Scene) {
+  const pool: { label: CSS2DObject; text: HTMLDivElement }[] = [];
+  let used = 0;
+
+  const makeLabel = () => {
+    const text = document.createElement("div");
+    text.className = styles.label;
+
+    const label = new CSS2DObject(text);
+    label.center.set(0.5, 0.5);
+
+    scene.add(label);
+
+    return {
+      label,
+      text,
+    };
+  };
+
+  const getLabel = () => {
+    if (used < pool.length) {
+      const label = pool[used];
+      used++;
+      return label;
+    } else {
+      const label = makeLabel();
+      pool.push(label);
+      used++;
+      return label;
+    }
+  };
+
+  return {
+    reset: () => {
+      used = 0;
+      for (const { label } of pool) {
+        label.visible = false;
+      }
+    },
+
+    place: (position: Vector3, textContent: string) => {
+      const { label, text } = getLabel();
+      text.textContent = textContent;
+      label.position.copy(position);
+      label.visible = true;
+    },
+  };
 }
