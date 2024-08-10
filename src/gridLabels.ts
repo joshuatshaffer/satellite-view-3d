@@ -1,17 +1,9 @@
-import { PerspectiveCamera, Scene, Vector3 } from "three";
+import { PerspectiveCamera, Scene, Vector2, Vector3 } from "three";
 import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import styles from "./ArOverlay.module.css";
 import { lookAnglesToPosition } from "./lookAnglesToPosition";
 import { degToRad, radToDeg } from "./rotations";
 import { wrap } from "./wrap";
-
-function distanceToViewEdge(camera: PerspectiveCamera, position: Vector3) {
-  const deviceCoordinates = position.clone().project(camera);
-  return Math.min(
-    1 - Math.abs(deviceCoordinates.x),
-    1 - Math.abs(deviceCoordinates.y)
-  );
-}
 
 function deviceCoordinatesToLookAngles(
   camera: PerspectiveCamera,
@@ -29,8 +21,6 @@ function deviceCoordinatesToLookAngles(
   return { azimuth, elevation };
 }
 
-const debugElement = document.getElementById("debug")!;
-
 export function makeGridLabels(scene: Scene, camera: PerspectiveCamera) {
   const labelPool = makeLabelPool(scene);
 
@@ -38,94 +28,75 @@ export function makeGridLabels(scene: Scene, camera: PerspectiveCamera) {
     labelPool.reset();
     camera.updateMatrixWorld();
 
-    const points = {
-      topLeft: deviceCoordinatesToLookAngles(camera, new Vector3(-1, 1, 0)),
-      topCenter: deviceCoordinatesToLookAngles(camera, new Vector3(0, 1, 0)),
-      topRight: deviceCoordinatesToLookAngles(camera, new Vector3(1, 1, 0)),
-      centerLeft: deviceCoordinatesToLookAngles(camera, new Vector3(-1, 0, 0)),
-      centerRight: deviceCoordinatesToLookAngles(camera, new Vector3(1, 0, 0)),
-      bottomLeft: deviceCoordinatesToLookAngles(camera, new Vector3(-1, -1, 0)),
-      bottomCenter: deviceCoordinatesToLookAngles(
-        camera,
-        new Vector3(0, -1, 0)
-      ),
-      bottomRight: deviceCoordinatesToLookAngles(camera, new Vector3(1, -1, 0)),
+    const elevationStep = degToRad(30);
+    const azimuthStep = degToRad(90);
+
+    const scan = (xToDc: (x: number) => Vector3, center: Vector2) => {
+      let prevX = -1;
+      let prevTestPoint = deviceCoordinatesToLookAngles(camera, xToDc(prevX));
+      for (let i = 1; i < 100; i++) {
+        const x = (i * 2) / 100 - 1;
+        const testPoint = deviceCoordinatesToLookAngles(camera, xToDc(x));
+
+        if (
+          Math.floor(testPoint.elevation / elevationStep) !==
+          Math.floor(prevTestPoint.elevation / elevationStep)
+        ) {
+          const elevation =
+            Math.floor(
+              Math.max(testPoint.elevation, prevTestPoint.elevation) /
+                elevationStep
+            ) * elevationStep;
+          const r = findRoot(
+            (y) =>
+              deviceCoordinatesToLookAngles(camera, xToDc(y)).elevation -
+              elevation,
+            prevX,
+            x
+          );
+
+          labelPool.place(
+            lookAnglesToPosition(
+              deviceCoordinatesToLookAngles(camera, xToDc(r))
+            ),
+            radToDeg(elevation).toFixed(2),
+            center
+          );
+        }
+
+        if (
+          Math.floor(testPoint.azimuth / azimuthStep) !==
+          Math.floor(prevTestPoint.azimuth / azimuthStep)
+        ) {
+          const azimuth =
+            Math.floor(
+              Math.max(testPoint.azimuth, prevTestPoint.azimuth) / azimuthStep
+            ) * azimuthStep;
+          const r = findRoot(
+            (y) =>
+              deviceCoordinatesToLookAngles(camera, xToDc(y)).azimuth - azimuth,
+            prevX,
+            x
+          );
+
+          labelPool.place(
+            lookAnglesToPosition(
+              deviceCoordinatesToLookAngles(camera, xToDc(r))
+            ),
+            radToDeg(azimuth).toFixed(2),
+            center
+          );
+        }
+
+        prevX = x;
+        prevTestPoint = testPoint;
+      }
     };
 
-    for (const elevation of [
-      degToRad(-60),
-      degToRad(-30),
-      0,
-      degToRad(30),
-      degToRad(60),
-    ]) {
-      if (
-        points.bottomLeft.elevation < elevation !==
-        points.bottomCenter.elevation < elevation
-      ) {
-        const r = findRoot(
-          (azimuth) =>
-            distanceToViewEdge(
-              camera,
-              lookAnglesToPosition({ azimuth, elevation })
-            ),
-          points.bottomLeft.azimuth,
-          points.bottomCenter.azimuth
-        );
-
-        labelPool.place(
-          lookAnglesToPosition({ azimuth: r, elevation }),
-          radToDeg(elevation).toFixed(2)
-        );
-        labelPool.place(
-          lookAnglesToPosition({
-            azimuth: 2 * points.bottomCenter.azimuth - r,
-            elevation,
-          }),
-          radToDeg(elevation).toFixed(2)
-        );
-      }
-
-      if (
-        points.bottomLeft.elevation < elevation !==
-        points.centerLeft.elevation < elevation
-      ) {
-        const r = findRoot(
-          (azimuth) =>
-            distanceToViewEdge(
-              camera,
-              lookAnglesToPosition({ azimuth, elevation })
-            ),
-          points.bottomLeft.azimuth,
-          points.centerLeft.azimuth
-        );
-
-        labelPool.place(
-          lookAnglesToPosition({ azimuth: r, elevation }),
-          radToDeg(elevation).toFixed(2)
-        );
-        labelPool.place(
-          lookAnglesToPosition({
-            azimuth: 2 * points.bottomCenter.azimuth - r,
-            elevation,
-          }),
-          radToDeg(elevation).toFixed(2)
-        );
-      }
-    }
-
-    debugElement.textContent = JSON.stringify(
-      {
-        ...Object.fromEntries(
-          Object.entries(points).map(([k, { azimuth, elevation }]) => [
-            k,
-            { azimuth: radToDeg(azimuth), elevation: radToDeg(elevation) },
-          ])
-        ),
-      },
-      null,
-      2
-    );
+    scan((x) => new Vector3(-1, x, 0.5), new Vector2(0, 0.5));
+    scan((x) => new Vector3(1, x, 0.5), new Vector2(1, 0.5));
+    scan((x) => new Vector3(x, -1, 0.5), new Vector2(0.5, 1));
+    scan((x) => new Vector3(x, 1, 0.5), new Vector2(0.5, 0));
   };
 
   return {
@@ -140,15 +111,27 @@ function findRoot(
   epsilon = 0.0001,
   maxIterations = 100
 ) {
-  let x;
+  let y0 = f(x0);
+  let x = (x0 + x1) / 2;
+
   for (let i = 0; i < maxIterations; i++) {
-    x = x1 - (f(x1) * (x1 - x0)) / (f(x1) - f(x0));
-    if (Math.abs(x - x0) < epsilon) {
-      break;
+    const y = f(x);
+
+    if (Math.abs(y) < epsilon) {
+      return x;
     }
-    [x0, x1] = [x1, x];
+
+    if (Math.sign(y) === Math.sign(y0)) {
+      x0 = x;
+      y0 = y;
+    } else {
+      x1 = x;
+    }
+
+    x = (x0 + x1) / 2;
   }
-  return x!;
+
+  return x;
 }
 
 function makeLabelPool(scene: Scene) {
@@ -191,11 +174,15 @@ function makeLabelPool(scene: Scene) {
       }
     },
 
-    place: (position: Vector3, textContent: string) => {
+    place: (position: Vector3, textContent: string, center?: Vector2) => {
       const { label, text } = getLabel();
       text.textContent = textContent;
       label.position.copy(position);
       label.visible = true;
+
+      if (center) {
+        label.center.copy(center);
+      }
     },
   };
 }
