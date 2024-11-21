@@ -49,6 +49,7 @@ const observerPositionSavedAtom = atomWithStorage<{
   height: 0,
 });
 
+// TODO: Handle errors and permissions.
 export const geolocationAtom = atom<
   GeolocationPosition | GeolocationPositionError | null
 >(null);
