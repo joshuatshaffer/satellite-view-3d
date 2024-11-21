@@ -2,6 +2,9 @@
 *.generated.*
 src/generated
 
+# Runtime
+.devServer
+
 # Logs
 logs
 *.log
