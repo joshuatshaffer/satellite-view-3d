@@ -1,3 +1,4 @@
+import { atom } from "jotai";
 import * as satellite from "satellite.js";
 
 export type Tle = [line1: string, line2: string];
@@ -7,17 +8,16 @@ export interface SatelliteDefinition {
   tle: Tle;
 }
 
-export class SatelliteDefinitions {
-  public readonly definitions = new Map<string, SatelliteDefinition>();
-  public readonly records = new Map<string, satellite.SatRec>();
+export const satelliteDefinitionsAtom = atom<{
+  definitions: ReadonlyMap<string, SatelliteDefinition>;
+  records: ReadonlyMap<string, satellite.SatRec>;
+}>({ definitions: new Map(), records: new Map() });
 
-  public readonly dependents = new Set<{
-    needsUpdate: boolean;
-  }>();
-
-  setSatellites(newDefinitions: Iterable<SatelliteDefinition>) {
-    this.definitions.clear();
-    this.records.clear();
+export const setSatellitesAtom = atom(
+  null,
+  (_get, set, newDefinitions: Iterable<SatelliteDefinition>) => {
+    const definitions = new Map<string, SatelliteDefinition>();
+    const records = new Map<string, satellite.SatRec>();
 
     for (const definition of newDefinitions) {
       const record = satellite.twoline2satrec(
@@ -27,12 +27,10 @@ export class SatelliteDefinitions {
 
       const id = record.satnum;
 
-      this.definitions.set(id, definition);
-      this.records.set(id, record);
+      definitions.set(id, definition);
+      records.set(id, record);
     }
 
-    for (const dependent of this.dependents) {
-      dependent.needsUpdate = true;
-    }
+    set(satelliteDefinitionsAtom, { definitions, records });
   }
-}
+);

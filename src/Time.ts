@@ -1,13 +1,3 @@
-export class Time {
-  public readonly dependents = new Set<{ needsUpdate: boolean }>();
+import { atom } from "jotai";
 
-  public date = new Date();
-
-  update() {
-    this.date = new Date();
-
-    for (const dependent of this.dependents) {
-      dependent.needsUpdate = true;
-    }
-  }
-}
+export const timeAtom = atom(new Date());

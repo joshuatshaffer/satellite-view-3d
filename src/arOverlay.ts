@@ -15,12 +15,15 @@ import { makeInputs, PointerPosition } from "./inputs";
 import { Store } from "./jotai-types";
 import { degToRad } from "./rotations";
 import { satelliteAtPointer } from "./satelliteAtPointer";
-import { SatelliteDefinitions } from "./SatelliteDefinitions";
+import {
+  satelliteDefinitionsAtom,
+  setSatellitesAtom,
+} from "./SatelliteDefinitions";
 import { SatellitePoints } from "./SatellitePoints";
 import { SatellitePositions } from "./SatellitePositions";
 import { down, east, north, south, up, west } from "./sceneSpaceDirections";
 import { dragScaleAtom, lookScaleAtom, viewControlModeAtom } from "./settings";
-import { Time } from "./Time";
+import { timeAtom } from "./Time";
 
 const maxElevation = degToRad(90);
 const minElevation = degToRad(-90);
@@ -176,19 +179,11 @@ export function initAr({
     onZoom,
   });
 
-  const time = new Time();
-
-  const satelliteDefinitions = new SatelliteDefinitions();
-
   fetchSatelliteDefinitions().then((definitions) => {
-    satelliteDefinitions.setSatellites(definitions);
+    store.set(setSatellitesAtom, definitions);
   });
 
-  const satellitePositions = new SatellitePositions(
-    time,
-    satelliteDefinitions,
-    store
-  );
+  const satellitePositions = new SatellitePositions(store);
 
   const satellitePoints = new SatellitePoints(satellitePositions);
   scene.add(satellitePoints.points);
@@ -209,7 +204,9 @@ export function initAr({
       }
 
       const index = satellitePositions.idToIndex.get(satelliteId);
-      const definition = satelliteDefinitions.definitions.get(satelliteId);
+      const definition = store
+        .get(satelliteDefinitionsAtom)
+        .definitions.get(satelliteId);
 
       if (index === undefined || definition === undefined) {
         label.visible = false;
@@ -282,7 +279,7 @@ export function initAr({
   window.addEventListener("resize", onWindowResize);
 
   function animate() {
-    time.update();
+    store.set(timeAtom, new Date());
     satellitePositions.update();
     satellitePoints.update();
     updateHover();
