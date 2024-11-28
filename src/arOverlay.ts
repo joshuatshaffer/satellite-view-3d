@@ -313,4 +313,4 @@ export function initAr({
   };
 }
 
-const selectedSatelliteIdAtom = atom<string | undefined>(undefined);
+export const selectedSatelliteIdAtom = atom<string | undefined>(undefined);

@@ -9,7 +9,7 @@ export async function fetchSatelliteDefinitions() {
 
   for (let i = 0; i < lines.length - 2; i += 3) {
     definitions.push({
-      displayName: lines[i],
+      displayName: lines[i].trim(),
       tle: [lines[i + 1], lines[i + 2]],
     });
   }
