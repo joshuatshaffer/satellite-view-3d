@@ -1,3 +1,4 @@
+import { atom } from "jotai";
 import { PerspectiveCamera, Scene, WebGLRenderer } from "three";
 import Stats from "three/addons/libs/stats.module.js";
 import {
@@ -81,17 +82,18 @@ export function initAr({
     scene.add(label);
   }
 
-  let selectedSatelliteId: string | undefined;
-
   const onClick = (pointerPosition: PointerPosition) => {
-    selectedSatelliteId = satelliteAtPointer({
-      satellitePositions,
-      pointerPosition,
-      camera,
-      canvas,
-    });
+    store.set(
+      selectedSatelliteIdAtom,
+      satelliteAtPointer({
+        satellitePositions,
+        pointerPosition,
+        camera,
+        canvas,
+      })
+    );
 
-    console.log("Selected satellite", selectedSatelliteId);
+    console.log("Selected satellite", store.get(selectedSatelliteIdAtom));
   };
 
   let zoom = 1;
@@ -284,7 +286,7 @@ export function initAr({
     satellitePositions.update();
     satellitePoints.update();
     updateHover();
-    selectedSatelliteLabel.update(selectedSatelliteId);
+    selectedSatelliteLabel.update(store.get(selectedSatelliteIdAtom));
     deviceOrientationControls.update();
 
     gridLabels.update();
@@ -313,3 +315,5 @@ export function initAr({
     window.removeEventListener("resize", onWindowResize);
   };
 }
+
+const selectedSatelliteIdAtom = atom<string | undefined>(undefined);
