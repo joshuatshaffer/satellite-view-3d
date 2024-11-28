@@ -1,4 +1,3 @@
-import { atom } from "jotai";
 import { PerspectiveCamera, Scene, WebGLRenderer } from "three";
 import Stats from "three/addons/libs/stats.module.js";
 import {
@@ -24,6 +23,7 @@ import { SatellitePositions } from "./SatellitePositions";
 import { down, east, north, south, up, west } from "./sceneSpaceDirections";
 import { dragScaleAtom, lookScaleAtom, viewControlModeAtom } from "./settings";
 import { timeAtom } from "./Time";
+import { selectedSatelliteIdAtom } from "./urlAtom";
 
 const maxElevation = degToRad(90);
 const minElevation = degToRad(-90);
@@ -312,5 +312,3 @@ export function initAr({
     window.removeEventListener("resize", onWindowResize);
   };
 }
-
-export const selectedSatelliteIdAtom = atom<string | undefined>(undefined);

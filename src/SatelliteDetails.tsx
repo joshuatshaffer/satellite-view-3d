@@ -1,7 +1,7 @@
 import { atom, useAtomValue } from "jotai";
-import { selectedSatelliteIdAtom } from "./arOverlay";
 import { satelliteDefinitionsAtom } from "./SatelliteDefinitions";
 import styles from "./SatelliteDetails.module.css";
+import { selectedSatelliteIdAtom } from "./urlAtom";
 
 const selectedSatelliteDefinitionAtom = atom((get) => {
   const selectedSatelliteId = get(selectedSatelliteIdAtom);
