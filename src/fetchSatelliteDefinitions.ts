@@ -1,7 +1,5 @@
+import tleUrl from "./generated/tle.txt";
 import { SatelliteDefinition } from "./SatelliteDefinitions";
-
-const tleUrl =
-  "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle";
 
 export async function fetchSatelliteDefinitions() {
   const response = await fetch(tleUrl);
