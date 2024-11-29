@@ -1,5 +1,6 @@
 import { Camera, Matrix4, Vector3 } from "three";
 import { PointerPosition } from "./inputs";
+import { ndcInView } from "./ndcInView";
 import { SatellitePositions } from "./SatellitePositions";
 
 const maxDistance = 20;
@@ -36,15 +37,7 @@ export function satelliteAtPointer({
       )
       .applyMatrix4(sceneSpaceToNdc);
 
-    const isInView =
-      positionInNdc.z >= 0 &&
-      positionInNdc.z <= 1 &&
-      positionInNdc.x >= -1 &&
-      positionInNdc.x <= 1 &&
-      positionInNdc.y >= -1 &&
-      positionInNdc.y <= 1;
-
-    if (!isInView) {
+    if (!ndcInView(positionInNdc)) {
       continue;
     }
 
