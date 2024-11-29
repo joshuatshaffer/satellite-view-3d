@@ -30,6 +30,7 @@ export function makeDeviceOrientationControls(camera: Camera) {
       if (deviceOrientation) {
         deviceOrientationToCameraQuaternion(
           deviceOrientation,
+          window.screen.orientation,
           camera.quaternion
         );
       }

@@ -269,6 +269,7 @@ export function initAr({
   const selectedSatelliteLabel = makeSatelliteLabel();
 
   const onWindowResize = () => {
+    // TODO: Update FOV when screen rotates. FOV is for the width of the screen.
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
 

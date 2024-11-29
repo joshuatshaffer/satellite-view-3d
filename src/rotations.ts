@@ -28,10 +28,22 @@ const devicePhysicalCameraQuaternion = Object.freeze(
 
 export function deviceOrientationToCameraQuaternion(
   orientation: DeviceOrientation,
+  screenOrientation?: ScreenOrientation,
   quaternion = new Quaternion()
 ) {
   quaternion.setFromEuler(deviceOrientationToEuler(orientation));
+
   quaternion.premultiply(devicePhysicalCameraQuaternion);
+
+  const screenAngle = screenOrientation?.angle;
+  if (screenAngle !== undefined && screenAngle !== 0) {
+    quaternion.multiply(
+      new Quaternion().setFromEuler(
+        new Euler(0, 0, -degToRad(screenAngle), "XYZ")
+      )
+    );
+  }
+
   return quaternion;
 }
 
