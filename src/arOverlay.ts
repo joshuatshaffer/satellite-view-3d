@@ -99,8 +99,6 @@ export function initAr({
     console.log("Selected satellite", store.get(selectedSatelliteIdAtom));
   };
 
-  let zoom = 1;
-
   const deviceOrientationControls = makeDeviceOrientationControls(camera);
 
   const updateActiveControls = () => {
@@ -119,7 +117,9 @@ export function initAr({
     updateActiveControls
   );
 
+  let zoom = 1;
   const onZoom = (delta: number) => {
+    // TODO: Zoom towards the pointer position in drag and look modes.
     zoom = clamp(zoom - delta * 0.001, 1, 10);
 
     camera.zoom = zoom * zoom;
