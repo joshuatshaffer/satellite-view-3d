@@ -1,4 +1,4 @@
-import tleUrl from "./generated/tle.txt";
+import tleUrl from "../generated/tle.txt";
 import { SatelliteDefinition } from "./SatelliteDefinitions";
 
 export async function fetchSatelliteDefinitions() {
