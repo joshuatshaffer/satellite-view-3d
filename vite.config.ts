@@ -1,5 +1,6 @@
 import basicSsl from "@vitejs/plugin-basic-ssl";
 import react from "@vitejs/plugin-react";
+import vike from "vike/plugin";
 import { defineConfig } from "vite";
 
 // https://vitejs.dev/config/
@@ -7,6 +8,7 @@ export default defineConfig({
   clearScreen: false,
   plugins: [
     react(),
+    vike({ prerender: true }),
     // Need to have HTTPS to use the Geolocation API.
     basicSsl({
       name: "test",

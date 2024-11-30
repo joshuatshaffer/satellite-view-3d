@@ -7,7 +7,7 @@
     "test": "vitest",
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "deploy": "/home/joshua/data-i/personal-projects/active/my-server/derployer/derployer.sh satellite ./dist",
+    "deploy": "/home/joshua/data-i/personal-projects/active/my-server/derployer/derployer.sh satellite ./dist/client",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "update-tle": "mkdir -p ./src/generated && wget 'https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle' -O ./src/generated/tle.txt"
@@ -18,7 +18,9 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "satellite.js": "5.0.0",
-    "three": "0.166.1"
+    "three": "0.166.1",
+    "vike": "0.4.205",
+    "vike-react": "0.5.9"
   },
   "devDependencies": {
     "@types/node": "20.14.11",
