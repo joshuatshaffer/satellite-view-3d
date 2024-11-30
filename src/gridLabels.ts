@@ -59,7 +59,7 @@ export function makeGridLabels(scene: Scene, camera: PerspectiveCamera) {
             lookAnglesToPosition(
               deviceCoordinatesToLookAngles(camera, xToDc(r))
             ),
-            radToDeg(elevation).toFixed(2),
+            radToDeg(elevation).toFixed(0) + "°",
             center
           );
         }
@@ -83,7 +83,7 @@ export function makeGridLabels(scene: Scene, camera: PerspectiveCamera) {
             lookAnglesToPosition(
               deviceCoordinatesToLookAngles(camera, xToDc(r))
             ),
-            radToDeg(azimuth).toFixed(2),
+            radToDeg(azimuth).toFixed(0) + "°",
             center
           );
         }
@@ -141,6 +141,7 @@ function makeLabelPool(scene: Scene) {
   const makeLabel = () => {
     const text = document.createElement("div");
     text.className = styles.label;
+    text.style.fontSize = "small";
 
     const label = new CSS2DObject(text);
     label.center.set(0.5, 0.5);
