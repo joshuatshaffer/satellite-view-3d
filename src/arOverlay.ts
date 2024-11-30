@@ -1,4 +1,4 @@
-import { PerspectiveCamera, Scene, Vector3, WebGLRenderer } from "three";
+import { PerspectiveCamera, Scene, WebGLRenderer } from "three";
 import Stats from "three/addons/libs/stats.module.js";
 import {
   CSS2DObject,
@@ -12,13 +12,11 @@ import { makeGrid } from "./grid";
 import { makeGridLabels } from "./gridLabels";
 import { makeInputs, PointerPosition } from "./inputs";
 import { Store } from "./jotai-types";
-import { ndcInView } from "./ndcInView";
 import { degToRad } from "./rotations";
 import { satelliteAtPointer } from "./satelliteAtPointer";
-import {
-  satelliteDefinitionsAtom,
-  setSatellitesAtom,
-} from "./SatelliteDefinitions";
+import { setSatellitesAtom } from "./SatelliteDefinitions";
+import { makeSatelliteLabel } from "./SatelliteLabel/makeSatelliteLabel";
+import { makeSatelliteOffscreenPointer } from "./SatelliteLabel/makeSatelliteOffscreenPointer";
 import { SatellitePoints } from "./SatellitePoints";
 import { SatellitePositions } from "./SatellitePositions";
 import { down, east, north, south, up, west } from "./sceneSpaceDirections";
@@ -98,8 +96,6 @@ export function initAr({
         canvas,
       })
     );
-
-    console.log("Selected satellite", store.get(selectedSatelliteIdAtom));
   };
 
   const deviceOrientationControls = makeDeviceOrientationControls(camera);
@@ -191,130 +187,7 @@ export function initAr({
   const satellitePoints = new SatellitePoints(satellitePositions);
   scene.add(satellitePoints.points);
 
-  const makeSatelliteLabel = () => {
-    const text = document.createElement("div");
-    text.className = styles.label;
-
-    const label = new CSS2DObject(text);
-    label.center.set(0, 0);
-
-    scene.add(label);
-
-    const update = (satelliteId: string | undefined) => {
-      if (satelliteId === undefined) {
-        label.visible = false;
-        return;
-      }
-
-      const index = satellitePositions.idToIndex.get(satelliteId);
-      const definition = store
-        .get(satelliteDefinitionsAtom)
-        .definitions.get(satelliteId);
-
-      if (index === undefined || definition === undefined) {
-        label.visible = false;
-        return;
-      }
-
-      label.visible = true;
-      label.element.textContent = definition.displayName;
-      label.position.set(
-        satellitePositions.scenePositions[index * 3],
-        satellitePositions.scenePositions[index * 3 + 1],
-        satellitePositions.scenePositions[index * 3 + 2]
-      );
-    };
-
-    return { update };
-  };
-
-  const makeSatelliteOffscreenPointer = () => {
-    const rootElement = document.createElement("div");
-    rootElement.className = styles.offscreenPointer;
-
-    const label = document.createElement("div");
-    label.style.position = "absolute";
-    label.style.width = "max-content";
-
-    rootElement.appendChild(label);
-
-    hudDom.appendChild(rootElement);
-
-    const satellitePositionNdc = new Vector3();
-
-    const update = (satelliteId: string | undefined) => {
-      if (satelliteId === undefined) {
-        rootElement.hidden = true;
-        return;
-      }
-
-      const index = satellitePositions.idToIndex.get(satelliteId);
-      const definition = store
-        .get(satelliteDefinitionsAtom)
-        .definitions.get(satelliteId);
-
-      if (index === undefined || definition === undefined) {
-        rootElement.hidden = true;
-        return;
-      }
-
-      satellitePositionNdc
-        .set(
-          satellitePositions.scenePositions[index * 3],
-          satellitePositions.scenePositions[index * 3 + 1],
-          satellitePositions.scenePositions[index * 3 + 2]
-        )
-        .project(camera);
-
-      if (ndcInView(satellitePositionNdc)) {
-        rootElement.hidden = true;
-        return;
-      }
-
-      // If the satellite is behind the camera the projected coordinates will be
-      // flipped.
-      if (satellitePositionNdc.z >= 1) {
-        satellitePositionNdc.x = -satellitePositionNdc.x;
-        satellitePositionNdc.y = -satellitePositionNdc.y;
-      }
-
-      const angle = Math.atan2(satellitePositionNdc.y, satellitePositionNdc.x);
-
-      const s = Math.sin(angle);
-      const c = Math.cos(angle);
-
-      if (Math.abs(s) > Math.abs(c)) {
-        satellitePositionNdc.set(c / Math.abs(s), Math.sign(s), 0);
-      } else {
-        satellitePositionNdc.set(Math.sign(c), s / Math.abs(c), 0);
-      }
-
-      const pointingLeft = angle > Math.PI / 2 || angle < -Math.PI / 2;
-
-      label.textContent = pointingLeft
-        ? `🠈 ${definition.displayName}`
-        : `${definition.displayName} 🠊`;
-      label.style.transform = pointingLeft
-        ? "translate(0, -50%)"
-        : "translate(-100%, -50%)";
-
-      rootElement.style.left = `${(1 + satellitePositionNdc.x) * 50}%`;
-      rootElement.style.top = `${(1 - satellitePositionNdc.y) * 50}%`;
-      rootElement.style.transform = `rotate(${
-        pointingLeft ? Math.PI - angle : -angle
-      }rad)`;
-
-      rootElement.hidden = false;
-    };
-
-    const dispose = () => {
-      hudDom.removeChild(rootElement);
-    };
-
-    return { update, dispose };
-  };
-
-  const hoverLabel = makeSatelliteLabel();
+  const hoverLabel = makeSatelliteLabel(scene, satellitePositions, store);
 
   const updateHover = () => {
     const inputState = inputs.getInputState();
@@ -355,8 +228,17 @@ export function initAr({
     }
   };
 
-  const selectedSatelliteLabel = makeSatelliteLabel();
-  const selectedSatelliteOffscreenPointer = makeSatelliteOffscreenPointer();
+  const selectedSatelliteLabel = makeSatelliteLabel(
+    scene,
+    satellitePositions,
+    store
+  );
+  const selectedSatelliteOffscreenPointer = makeSatelliteOffscreenPointer({
+    hudDom,
+    satellitePositions,
+    store,
+    camera,
+  });
 
   const onWindowResize = () => {
     // TODO: Update FOV when screen rotates. FOV is for the width of the screen.
