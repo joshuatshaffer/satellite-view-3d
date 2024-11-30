@@ -1,10 +1,6 @@
 import { PerspectiveCamera, Scene, WebGLRenderer } from "three";
 import Stats from "three/addons/libs/stats.module.js";
-import {
-  CSS2DObject,
-  CSS2DRenderer,
-} from "three/addons/renderers/CSS2DRenderer.js";
-import styles from "./ArOverlay.module.css";
+import { CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 import { clamp } from "./clamp";
 import { makeDeviceOrientationControls } from "./DeviceOrientationControls";
 import { fetchSatelliteDefinitions } from "./fetchSatelliteDefinitions";
@@ -12,6 +8,7 @@ import { makeGrid } from "./grid";
 import { makeGridLabels } from "./gridLabels";
 import { makeInputs, PointerPosition } from "./inputs";
 import { Store } from "./jotai-types";
+import { makeCardinalDirectionLabels } from "./makeCardinalDirectionLabels";
 import { degToRad } from "./rotations";
 import { satelliteAtPointer } from "./satelliteAtPointer";
 import { setSatellitesAtom } from "./SatelliteDefinitions";
@@ -19,7 +16,6 @@ import { makeSatelliteLabel } from "./SatelliteLabel/makeSatelliteLabel";
 import { makeSatelliteOffscreenPointer } from "./SatelliteLabel/makeSatelliteOffscreenPointer";
 import { SatellitePoints } from "./SatellitePoints";
 import { SatellitePositions } from "./SatellitePositions";
-import { down, east, north, south, up, west } from "./sceneSpaceDirections";
 import { dragScaleAtom, lookScaleAtom, viewControlModeAtom } from "./settings";
 import { timeAtom } from "./Time";
 import { selectedSatelliteIdAtom } from "./urlAtom";
@@ -67,24 +63,7 @@ export function initAr({
 
   const gridLabels = makeGridLabels(scene, camera);
 
-  for (const { text, position } of [
-    { text: "North", position: north() },
-    { text: "South", position: south() },
-    { text: "East", position: east() },
-    { text: "West", position: west() },
-    { text: "Nadir", position: down() },
-    { text: "Zenith", position: up() },
-  ]) {
-    const div = document.createElement("div");
-    div.className = styles.label;
-    div.textContent = text;
-
-    const label = new CSS2DObject(div);
-    label.position.copy(position).multiplyScalar(100);
-    label.center.set(0.5, 0.5);
-
-    scene.add(label);
-  }
+  makeCardinalDirectionLabels(scene);
 
   const onClick = (pointerPosition: PointerPosition) => {
     store.set(
