@@ -16,7 +16,10 @@ import { SatellitePoints } from "./SatellitePoints";
 import { SatellitePositions } from "./SatellitePositions";
 import { dragScaleAtom, lookScaleAtom, viewControlModeAtom } from "./settings";
 import { timeAtom } from "./Time";
-import { selectedSatelliteIdAtom } from "./urlAtom";
+import {
+  highlightedSatelliteIdsAtom,
+  selectedSatelliteIdAtom,
+} from "./urlAtom";
 
 const maxElevation = degToRad(90);
 const minElevation = degToRad(-90);
@@ -224,6 +227,19 @@ export function startSkyViewRenderer({
     camera,
   });
 
+  const highlightedSatelliteLabels = Array.from(
+    { length: store.get(highlightedSatelliteIdsAtom).length },
+    () => ({
+      label: makeSatelliteLabel(scene, satellitePositions, store),
+      offscreenPointer: makeSatelliteOffscreenPointer({
+        hudRoot,
+        satellitePositions,
+        store,
+        camera,
+      }),
+    })
+  );
+
   const onWindowResize = () => {
     // TODO: Update FOV when screen rotates. FOV is for the width of the screen.
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -248,6 +264,16 @@ export function startSkyViewRenderer({
     selectedSatelliteOffscreenPointer.update(
       store.get(selectedSatelliteIdAtom)
     );
+
+    const highlightedSatelliteIds = store.get(highlightedSatelliteIdsAtom);
+    for (const [
+      index,
+      { label, offscreenPointer },
+    ] of highlightedSatelliteLabels.entries()) {
+      label.update(highlightedSatelliteIds[index]);
+      offscreenPointer.update(highlightedSatelliteIds[index]);
+    }
+
     stats.update();
 
     renderer.render(scene, camera);

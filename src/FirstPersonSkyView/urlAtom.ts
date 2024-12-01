@@ -2,22 +2,31 @@ import { PrimitiveAtom, atom } from "jotai";
 
 export interface UrlState {
   selectedSatelliteId: string | undefined;
+  highlightedSatelliteIds: string[];
 }
 
-const selectedSatelliteIdKey = "selected-satellite-id";
+const selectedSatelliteIdKey = "s";
+const highlightedSatelliteIdsKey = "h";
 
 function readStateFromUrl(): UrlState {
   const searchParams = new URLSearchParams(window.location.search.slice(1));
 
   return {
     selectedSatelliteId: searchParams.get(selectedSatelliteIdKey) || undefined,
+    highlightedSatelliteIds:
+      searchParams.getAll(highlightedSatelliteIdsKey) || [],
   };
 }
 
 function writeStateToUrl(state: UrlState) {
   const searchParams = new URLSearchParams();
+
   if (state.selectedSatelliteId) {
     searchParams.set(selectedSatelliteIdKey, state.selectedSatelliteId);
+  }
+
+  for (const h of state.highlightedSatelliteIds) {
+    searchParams.append(highlightedSatelliteIdsKey, h);
   }
 
   window.history.replaceState(null, "", `?${searchParams.toString()}`);
@@ -41,5 +50,15 @@ export const selectedSatelliteIdAtom = atom(
       prev.selectedSatelliteId === selectedSatelliteId
         ? prev
         : { ...prev, selectedSatelliteId }
+    )
+);
+
+export const highlightedSatelliteIdsAtom = atom(
+  (get) => get(urlStateAtom).highlightedSatelliteIds,
+  (_get, set, highlightedSatelliteIds: UrlState["highlightedSatelliteIds"]) =>
+    set(urlStateAtom, (prev) =>
+      prev.highlightedSatelliteIds === highlightedSatelliteIds
+        ? prev
+        : { ...prev, highlightedSatelliteIds }
     )
 );
