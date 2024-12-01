@@ -6,12 +6,12 @@ import { SatellitePositions } from "../SatellitePositions";
 import styles from "../SkyViewRenderer.module.css";
 
 export function makeSatelliteOffscreenPointer({
-  hudDom,
+  hudRoot,
   satellitePositions,
   store,
   camera,
 }: {
-  hudDom: HTMLDivElement;
+  hudRoot: HTMLDivElement;
   satellitePositions: SatellitePositions;
   store: Store;
   camera: PerspectiveCamera;
@@ -25,7 +25,7 @@ export function makeSatelliteOffscreenPointer({
 
   rootElement.appendChild(label);
 
-  hudDom.appendChild(rootElement);
+  hudRoot.appendChild(rootElement);
 
   const satellitePositionNdc = new Vector3();
 
@@ -95,7 +95,7 @@ export function makeSatelliteOffscreenPointer({
   };
 
   const dispose = () => {
-    hudDom.removeChild(rootElement);
+    hudRoot.removeChild(rootElement);
   };
 
   return { update, dispose };

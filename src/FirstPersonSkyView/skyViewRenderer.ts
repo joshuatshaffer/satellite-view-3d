@@ -23,15 +23,15 @@ import { selectedSatelliteIdAtom } from "./urlAtom";
 const maxElevation = degToRad(90);
 const minElevation = degToRad(-90);
 
-export function initAr({
+export function startSkyViewRenderer({
   canvas,
-  arDom,
-  hudDom,
+  labelRoot,
+  hudRoot,
   store,
 }: {
   canvas: HTMLCanvasElement;
-  arDom: HTMLDivElement;
-  hudDom: HTMLDivElement;
+  labelRoot: HTMLDivElement;
+  hudRoot: HTMLDivElement;
   store: Store;
 }) {
   console.log("Initializing AR overlay");
@@ -53,7 +53,7 @@ export function initAr({
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setAnimationLoop(animate);
 
-  const labelRenderer = new CSS2DRenderer({ element: arDom });
+  const labelRenderer = new CSS2DRenderer({ element: labelRoot });
   labelRenderer.setSize(window.innerWidth, window.innerHeight);
   labelRenderer.domElement.style.position = "absolute";
   labelRenderer.domElement.style.top = "0px";
@@ -213,7 +213,7 @@ export function initAr({
     store
   );
   const selectedSatelliteOffscreenPointer = makeSatelliteOffscreenPointer({
-    hudDom,
+    hudRoot,
     satellitePositions,
     store,
     camera,

@@ -3,7 +3,7 @@ import { CameraPassthrough } from "./CameraPassthrough";
 import { ControlPanel } from "./ControlPanel/ControlPanel";
 import { SatelliteDetails } from "./SatelliteDetails";
 import { backgroundSettingAtom } from "./settings";
-import { ArOverlay } from "./SkyViewRenderer";
+import { SkyViewRenderer } from "./SkyViewRenderer";
 
 export function FirstPersonSkyView() {
   const background = useAtomValue(backgroundSettingAtom);
@@ -11,7 +11,7 @@ export function FirstPersonSkyView() {
   return (
     <>
       {background === "cameraPassthrough" ? <CameraPassthrough /> : null}
-      <ArOverlay />
+      <SkyViewRenderer />
       <SatelliteDetails />
       <ControlPanel />
     </>
