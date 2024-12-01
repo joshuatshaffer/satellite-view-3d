@@ -4,11 +4,9 @@ import { CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 import { clamp } from "./clamp";
 import { makeDeviceOrientationControls } from "./DeviceOrientationControls";
 import { fetchSatelliteDefinitions } from "./fetchSatelliteDefinitions";
-import { makeGrid } from "./grid";
-import { makeGridLabels } from "./gridLabels";
+import { makeGrid } from "./grid/grid";
 import { makeInputs, PointerPosition } from "./inputs";
 import { Store } from "./jotai-types";
-import { makeCardinalDirectionLabels } from "./makeCardinalDirectionLabels";
 import { degToRad } from "./rotations";
 import { satelliteAtPointer } from "./satelliteAtPointer";
 import { setSatellitesAtom } from "./SatelliteDefinitions";
@@ -68,11 +66,9 @@ export function startSkyViewRenderer({
   labelRenderer.domElement.style.top = "0px";
   labelRenderer.domElement.style.pointerEvents = "none";
 
-  scene.add(makeGrid());
+  const grid = makeGrid(camera);
 
-  const gridLabels = makeGridLabels(scene, camera);
-
-  makeCardinalDirectionLabels(scene);
+  scene.add(grid.gridRoot);
 
   const onClick = (pointerPosition: PointerPosition) => {
     store.set(
@@ -248,7 +244,7 @@ export function startSkyViewRenderer({
 
     deviceOrientationControls.update();
 
-    gridLabels.update();
+    grid.update();
     selectedSatelliteOffscreenPointer.update(
       store.get(selectedSatelliteIdAtom)
     );

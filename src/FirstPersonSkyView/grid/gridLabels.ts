@@ -1,10 +1,10 @@
-import { PerspectiveCamera, Scene, Vector2, Vector3 } from "three";
+import { Object3D, PerspectiveCamera, Vector2, Vector3 } from "three";
 import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
-import styles from "./SkyViewRenderer.module.css";
-import { lookAnglesToPosition } from "./lookAnglesToPosition";
-import { degToRad, radToDeg } from "./rotations";
-import { radii } from "./scenePositions";
-import { wrap } from "./wrap";
+import { lookAnglesToPosition } from "../lookAnglesToPosition";
+import { degToRad, radToDeg } from "../rotations";
+import { radii } from "../scenePositions";
+import styles from "../SkyViewRenderer.module.css";
+import { wrap } from "../wrap";
 
 function deviceCoordinatesToLookAngles(
   camera: PerspectiveCamera,
@@ -22,8 +22,8 @@ function deviceCoordinatesToLookAngles(
   return { azimuth, elevation };
 }
 
-export function makeGridLabels(scene: Scene, camera: PerspectiveCamera) {
-  const labelPool = makeLabelPool(scene);
+export function makeGridLabels(gridRoot: Object3D, camera: PerspectiveCamera) {
+  const labelPool = makeLabelPool(gridRoot);
 
   const update = () => {
     labelPool.reset();
@@ -137,7 +137,7 @@ function findRoot(
   return x;
 }
 
-function makeLabelPool(scene: Scene) {
+function makeLabelPool(gridRoot: Object3D) {
   const pool: { label: CSS2DObject; text: HTMLDivElement }[] = [];
   let used = 0;
 
@@ -149,7 +149,7 @@ function makeLabelPool(scene: Scene) {
     const label = new CSS2DObject(text);
     label.center.set(0.5, 0.5);
 
-    scene.add(label);
+    gridRoot.add(label);
 
     return {
       label,

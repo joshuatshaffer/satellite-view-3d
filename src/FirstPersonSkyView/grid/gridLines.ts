@@ -5,12 +5,10 @@ import {
   Object3D,
   Vector3,
 } from "three";
-import { degToRad } from "./rotations";
-import { radii } from "./scenePositions";
+import { degToRad } from "../rotations";
+import { radii } from "../scenePositions";
 
-export function makeGrid() {
-  const gridRoot = new Object3D();
-
+export function makeGridLines(gridRoot: Object3D) {
   const majorLineMaterial = new LineBasicMaterial({ color: "#00b" });
   const minorLineMaterial = new LineBasicMaterial({ color: "#2b2b2b" });
 
