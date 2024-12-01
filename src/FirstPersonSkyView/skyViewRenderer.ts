@@ -30,8 +30,17 @@ export function startSkyViewRenderer({
   store,
 }: {
   canvas: HTMLCanvasElement;
+
+  /**
+   * For rendering DOM elements in 3D space.
+   */
   labelRoot: HTMLDivElement;
+
+  /**
+   * For rendering DOM elements in screen space.
+   */
   hudRoot: HTMLDivElement;
+
   store: Store;
 }) {
   console.log("Initializing AR overlay");
