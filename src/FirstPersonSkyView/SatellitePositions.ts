@@ -2,6 +2,7 @@ import * as satellite from "satellite.js";
 import { Store } from "./jotai-types";
 import { lookAnglesToPosition } from "./lookAnglesToPosition";
 import { satelliteDefinitionsAtom } from "./SatelliteDefinitions";
+import { radii } from "./scenePositions";
 import { observerGdAtom } from "./settings";
 import { timeAtom } from "./Time";
 
@@ -77,7 +78,7 @@ export class SatellitePositions {
       const index = this.indexToId.size;
 
       this.scenePositions.set(
-        lookAnglesToPosition(lookAngles).toArray(),
+        lookAnglesToPosition(lookAngles, radii.satellitePoint).toArray(),
         index * 3
       );
 

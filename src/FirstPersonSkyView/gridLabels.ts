@@ -3,6 +3,7 @@ import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import styles from "./SkyViewRenderer.module.css";
 import { lookAnglesToPosition } from "./lookAnglesToPosition";
 import { degToRad, radToDeg } from "./rotations";
+import { radii } from "./scenePositions";
 import { wrap } from "./wrap";
 
 function deviceCoordinatesToLookAngles(
@@ -57,7 +58,8 @@ export function makeGridLabels(scene: Scene, camera: PerspectiveCamera) {
 
           labelPool.place(
             lookAnglesToPosition(
-              deviceCoordinatesToLookAngles(camera, xToDc(r))
+              deviceCoordinatesToLookAngles(camera, xToDc(r)),
+              radii.gridLabel
             ),
             radToDeg(elevation).toFixed(0) + "°",
             center
@@ -81,7 +83,8 @@ export function makeGridLabels(scene: Scene, camera: PerspectiveCamera) {
 
           labelPool.place(
             lookAnglesToPosition(
-              deviceCoordinatesToLookAngles(camera, xToDc(r))
+              deviceCoordinatesToLookAngles(camera, xToDc(r)),
+              radii.gridLabel
             ),
             radToDeg(azimuth).toFixed(0) + "°",
             center

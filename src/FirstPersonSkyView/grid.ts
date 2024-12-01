@@ -6,6 +6,7 @@ import {
   Vector3,
 } from "three";
 import { degToRad } from "./rotations";
+import { radii } from "./scenePositions";
 
 export function makeGrid() {
   const gridRoot = new Object3D();
@@ -14,13 +15,16 @@ export function makeGrid() {
   const minorLineMaterial = new LineBasicMaterial({ color: "#2b2b2b" });
 
   const numberOfVertices = 100;
-  const radius = 100;
 
   const loop = new BufferGeometry().setFromPoints(
     Array.from({ length: numberOfVertices }, (_, i) => {
       const theta = (Math.PI * 2 * i) / numberOfVertices;
 
-      return new Vector3(Math.cos(theta) * radius, 0, Math.sin(theta) * radius);
+      return new Vector3(
+        Math.cos(theta) * radii.gridLine,
+        0,
+        Math.sin(theta) * radii.gridLine
+      );
     })
   );
 
@@ -42,7 +46,7 @@ export function makeGrid() {
     const scale = Math.cos(elevation);
 
     line.scale.set(scale, 1, scale);
-    line.position.y = Math.sin(elevation) * radius;
+    line.position.y = Math.sin(elevation) * radii.gridLine;
 
     gridRoot.add(line);
   }
