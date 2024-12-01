@@ -1,9 +1,9 @@
 import { Scene } from "three";
 import { CSS2DObject } from "three/examples/jsm/Addons.js";
-import styles from "../ArOverlay.module.css";
 import { Store } from "../jotai-types";
 import { satelliteDefinitionsAtom } from "../SatelliteDefinitions";
 import { SatellitePositions } from "../SatellitePositions";
+import styles from "../SkyViewRenderer.module.css";
 
 export function makeSatelliteLabel(
   scene: Scene,

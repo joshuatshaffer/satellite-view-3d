@@ -1,6 +1,6 @@
 import { PerspectiveCamera, Scene, Vector2, Vector3 } from "three";
 import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
-import styles from "./ArOverlay.module.css";
+import styles from "./SkyViewRenderer.module.css";
 import { lookAnglesToPosition } from "./lookAnglesToPosition";
 import { degToRad, radToDeg } from "./rotations";
 import { wrap } from "./wrap";

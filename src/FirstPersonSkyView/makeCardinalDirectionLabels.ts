@@ -1,6 +1,6 @@
 import { Scene } from "three";
 import { CSS2DObject } from "three/examples/jsm/Addons.js";
-import styles from "./ArOverlay.module.css";
+import styles from "./SkyViewRenderer.module.css";
 import { down, east, north, south, up, west } from "./sceneSpaceDirections";
 
 export function makeCardinalDirectionLabels(scene: Scene) {

@@ -1,9 +1,9 @@
 import { PerspectiveCamera, Vector3 } from "three";
-import styles from "../ArOverlay.module.css";
 import { Store } from "../jotai-types";
 import { ndcInView } from "../ndcInView";
 import { satelliteDefinitionsAtom } from "../SatelliteDefinitions";
 import { SatellitePositions } from "../SatellitePositions";
+import styles from "../SkyViewRenderer.module.css";
 
 export function makeSatelliteOffscreenPointer({
   hudDom,

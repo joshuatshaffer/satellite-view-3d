@@ -1,7 +1,7 @@
 import { useStore } from "jotai";
 import { useEffect, useState } from "react";
-import { initAr } from "./arOverlay";
-import styles from "./ArOverlay.module.css";
+import styles from "./SkyViewRenderer.module.css";
+import { initAr } from "./skyViewRenderer";
 
 export function ArOverlay() {
   const [arCanvas, setArCanvas] = useState<HTMLCanvasElement | null>(null);
