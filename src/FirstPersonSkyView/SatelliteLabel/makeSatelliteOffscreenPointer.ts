@@ -58,9 +58,11 @@ export function makeSatelliteOffscreenPointer({
       return;
     }
 
+    const satelliteBehindCamera = satellitePositionNdc.z >= 1;
+
     // If the satellite is behind the camera the projected coordinates will be
     // flipped.
-    if (satellitePositionNdc.z >= 1) {
+    if (satelliteBehindCamera) {
       satellitePositionNdc.x = -satellitePositionNdc.x;
       satellitePositionNdc.y = -satellitePositionNdc.y;
     }
@@ -78,7 +80,11 @@ export function makeSatelliteOffscreenPointer({
 
     const pointingLeft = angle > Math.PI / 2 || angle < -Math.PI / 2;
 
-    label.textContent = pointingLeft
+    label.textContent = satelliteBehindCamera
+      ? pointingLeft
+        ? `⮎ ${definition.displayName}`
+        : `${definition.displayName} ⮌`
+      : pointingLeft
       ? `🠈 ${definition.displayName}`
       : `${definition.displayName} 🠊`;
     label.style.transform = pointingLeft
