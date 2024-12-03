@@ -47,6 +47,16 @@ export function SatelliteDetails() {
         Search SatNOGS DB
       </a>
       <br />
+      <a
+        href={`https://app.keeptrack.space/?sat=${encodeURIComponent(
+          selectedSatelliteId
+        )}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View in KeepTrack
+      </a>
+      <br />
       &nbsp;
     </div>
   );
