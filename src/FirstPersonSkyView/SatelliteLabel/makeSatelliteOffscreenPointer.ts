@@ -3,7 +3,7 @@ import { Store } from "../jotai-types";
 import { ndcInView } from "../ndcInView";
 import { satelliteDefinitionsAtom } from "../SatelliteDefinitions";
 import { SatellitePositions } from "../SatellitePositions";
-import styles from "../SkyViewRenderer.module.css";
+import styles from "./satelliteOffscreenPointer.module.scss";
 
 export function makeSatelliteOffscreenPointer({
   hudRoot,
@@ -22,6 +22,7 @@ export function makeSatelliteOffscreenPointer({
   const label = document.createElement("div");
   label.style.position = "absolute";
   label.style.width = "max-content";
+  label.className = styles.label;
 
   rootElement.appendChild(label);
 
@@ -80,16 +81,10 @@ export function makeSatelliteOffscreenPointer({
 
     const pointingLeft = angle > Math.PI / 2 || angle < -Math.PI / 2;
 
-    label.textContent = satelliteBehindCamera
-      ? pointingLeft
-        ? `⮎ ${definition.displayName}`
-        : `${definition.displayName} ⮌`
-      : pointingLeft
-      ? `🠈 ${definition.displayName}`
-      : `${definition.displayName} 🠊`;
-    label.style.transform = pointingLeft
-      ? "translate(0, -50%)"
-      : "translate(-100%, -50%)";
+    label.textContent = definition.displayName;
+
+    rootElement.dataset.pointing = pointingLeft ? "left" : "right";
+    rootElement.dataset.behindCamera = satelliteBehindCamera ? "true" : "false";
 
     rootElement.style.left = `${(1 + satellitePositionNdc.x) * 50}%`;
     rootElement.style.top = `${(1 - satellitePositionNdc.y) * 50}%`;

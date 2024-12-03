@@ -1,0 +1,52 @@
+.offscreenPointer {
+  color: white;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+    1px 1px 0 #000;
+
+  position: absolute;
+  width: 0;
+  height: 0;
+  font-size: smaller;
+}
+
+.offscreenPointer > .label {
+  &::before,
+  &::after {
+    display: inline-block;
+    vertical-align: middle;
+
+    filter: drop-shadow(-1px -1px 0 #000) drop-shadow(1px -1px 0 #000)
+      drop-shadow(-1px 1px 0 #000) drop-shadow(1px 1px 0 #000);
+  }
+}
+
+.offscreenPointer[data-pointing="left"] > .label {
+  transform: translate(0, -50%);
+
+  &::before {
+    content: url(./pointer.svg);
+    rotate: 0deg;
+  }
+}
+
+.offscreenPointer[data-pointing="right"] > .label {
+  transform: translate(-100%, -50%);
+
+  &::after {
+    content: url(./pointer.svg);
+    rotate: 180deg;
+    translate: 0 -3px;
+  }
+}
+
+.offscreenPointer[data-pointing="left"][data-behind-camera="true"]
+  > .label::before {
+  content: url(./pointer-behind.svg);
+  rotate: 180deg;
+}
+
+.offscreenPointer[data-pointing="right"][data-behind-camera="true"]
+  > .label::after {
+  content: url(./pointer-behind.svg);
+  rotate: 0deg;
+}
