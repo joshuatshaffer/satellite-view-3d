@@ -1,3 +1,20 @@
+## Comparisons and Similar Software
+
+- [OrbTrack](https://www.orbtrack.org/)
+- [Rouge Space](https://sky.rogue.space/)
+- [In-The-Sky.org](https://in-the-sky.org/skymap.php)
+- [The Sky Live](https://theskylive.com/)
+- [KeepTrack](https://www.keeptrack.space/)
+- [Heavens-Above](https://www.heavens-above.com/)
+- [N2YO.com](https://www.n2yo.com/)
+- [Stellarium](http://stellarium.org/)
+  - Also uses device orientation to show a view of the sky.
+  - Focused on astronomy, but can show satellites.
+- [AstroHopper](https://github.com/artyom-beilis/skyhopper)
+  - Also uses device orientation to show a view of the sky.
+  - Uses known stars to calibrate the device orientation.
+  - Does not show satellites.
+
 ## To Do
 
 - [x] Zoom in/out.
