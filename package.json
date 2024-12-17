@@ -9,11 +9,11 @@
     "build": "tsc -b && vite build",
     "deploy": "/home/joshua/data-i/personal-projects/active/my-server/derployer/derployer.sh satellite ./dist/client",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
-    "update-tle": "mkdir -p ./src/generated && wget 'https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle' -O ./src/generated/tle.txt"
+    "preview": "vite preview"
   },
   "dependencies": {
     "eruda": "3.2.1",
+    "idb": "8.0.1",
     "jotai": "2.9.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",

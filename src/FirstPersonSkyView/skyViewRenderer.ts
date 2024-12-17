@@ -1,15 +1,15 @@
 import { PerspectiveCamera, Scene, WebGLRenderer } from "three";
 import Stats from "three/addons/libs/stats.module.js";
 import { CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
+import { getTles } from "../satdb/tles";
 import { clamp } from "./clamp";
 import { makeDeviceOrientationControls } from "./DeviceOrientationControls";
-import { fetchSatelliteDefinitions } from "./fetchSatelliteDefinitions";
 import { makeGrid } from "./grid/grid";
 import { makeInputs, PointerPosition } from "./inputs";
 import { Store } from "./jotai-types";
 import { degToRad } from "./rotations";
 import { satelliteAtPointer } from "./satelliteAtPointer";
-import { setSatellitesAtom } from "./SatelliteDefinitions";
+import { SatelliteDefinition, setSatellitesAtom } from "./SatelliteDefinitions";
 import { makeSatelliteLabel } from "./SatelliteLabel/makeSatelliteLabel";
 import { makeSatelliteOffscreenPointer } from "./SatelliteLabel/makeSatelliteOffscreenPointer";
 import { SatellitePoints } from "./SatellitePoints";
@@ -165,8 +165,16 @@ export function startSkyViewRenderer({
     onZoom,
   });
 
-  fetchSatelliteDefinitions().then((definitions) => {
-    store.set(setSatellitesAtom, definitions);
+  getTles().then((tles) => {
+    store.set(
+      setSatellitesAtom,
+      tles.map(
+        (tle): SatelliteDefinition => ({
+          displayName: tle.objectName,
+          tle: [tle.line1, tle.line2],
+        })
+      )
+    );
   });
 
   const satellitePositions = new SatellitePositions(store);

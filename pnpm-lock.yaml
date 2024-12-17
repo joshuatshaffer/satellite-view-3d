@@ -8,6 +8,9 @@ dependencies:
   eruda:
     specifier: 3.2.1
     version: 3.2.1
+  idb:
+    specifier: 8.0.1
+    version: 8.0.1
   jotai:
     specifier: 2.9.1
     version: 2.9.1(@types/react@18.3.3)(react@18.3.1)
@@ -1692,6 +1695,10 @@ packages:
     dependencies:
       postcss: 8.4.39
     dev: true
+
+  /idb@8.0.1:
+    resolution: {integrity: sha512-EkBCzUZSdhJV8PxMSbeEV//xguVKZu9hZZulM+2gHXI0t2hGVU3eYE6/XnH77DS6FM2FY8wl17aDcu9vXpvLWQ==}
+    dev: false
 
   /ignore@5.3.1:
     resolution: {integrity: sha512-5Fytz/IraMjqpwfd34ke28PTVMjZjJG2MPn5t7OE4eUCUNf8BAa7b5WUS9/Qvr6mwOQS7Mk6vdsMno5he+T8Xw==}
