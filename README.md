@@ -45,3 +45,9 @@
 - [ ] Get transponder frequencies.
 - [ ] Show doppler shift.
 - [x] Link to other satellite tracking sites.
+
+## Special Thanks
+
+Thank you [Saveitforparts](https://www.youtube.com/@saveitforparts) and [dereksgc](https://www.youtube.com/@dereksgc) for inspiring me to get back into amateur radio and satellite tracking.
+
+Thank you [CelesTrak](https://www.celestrak.com/) for providing TLE data and documentation.
