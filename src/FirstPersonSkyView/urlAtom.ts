@@ -25,12 +25,12 @@ function writeStateToUrl(state: UrlState) {
     searchParams.set(selectedSatelliteIdKey, state.selectedSatelliteId);
   }
 
-  for (const h of state.highlightedSatelliteIds) {
+  for (const h of state.highlightedSatelliteIds.toSorted()) {
     searchParams.append(highlightedSatelliteIdsKey, h);
   }
 
+  searchParams.sort();
   const searchString = searchParams.toString();
-
   window.history.replaceState(
     null,
     "",
