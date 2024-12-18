@@ -7,6 +7,7 @@ import { makeDeviceOrientationControls } from "./DeviceOrientationControls";
 import { makeGrid } from "./grid/grid";
 import { makeInputs, PointerPosition } from "./inputs";
 import { Store } from "./jotai-types";
+import { makeHighlightedSatelliteLabels } from "./makeHighlightedSatelliteLabels";
 import { degToRad } from "./rotations";
 import { satelliteAtPointer } from "./satelliteAtPointer";
 import { SatelliteDefinition, setSatellitesAtom } from "./SatelliteDefinitions";
@@ -16,10 +17,7 @@ import { SatellitePoints } from "./SatellitePoints";
 import { SatellitePositions } from "./SatellitePositions";
 import { dragScaleAtom, lookScaleAtom, viewControlModeAtom } from "./settings";
 import { timeAtom } from "./Time";
-import {
-  highlightedSatelliteIdsAtom,
-  selectedSatelliteIdAtom,
-} from "./urlAtom";
+import { selectedSatelliteIdAtom } from "./urlAtom";
 
 const maxElevation = degToRad(90);
 const minElevation = degToRad(-90);
@@ -235,20 +233,13 @@ export function startSkyViewRenderer({
     camera,
   });
 
-  const makeHighlightedSatelliteLabel = () => ({
-    label: makeSatelliteLabel(scene, satellitePositions, store),
-    offscreenPointer: makeSatelliteOffscreenPointer({
-      hudRoot,
-      satellitePositions,
-      store,
-      camera,
-    }),
+  const highlightedSatelliteLabels = makeHighlightedSatelliteLabels({
+    scene,
+    hudRoot,
+    satellitePositions,
+    store,
+    camera,
   });
-
-  const highlightedSatelliteLabels = Array.from(
-    { length: store.get(highlightedSatelliteIdsAtom).length },
-    makeHighlightedSatelliteLabel
-  );
 
   const onWindowResize = () => {
     // TODO: Update FOV when screen rotates. FOV is for the width of the screen.
@@ -274,26 +265,7 @@ export function startSkyViewRenderer({
     selectedSatelliteOffscreenPointer.update(
       store.get(selectedSatelliteIdAtom)
     );
-
-    const highlightedSatelliteIds = store.get(highlightedSatelliteIdsAtom);
-
-    while (highlightedSatelliteIds.length > highlightedSatelliteLabels.length) {
-      highlightedSatelliteLabels.push(makeHighlightedSatelliteLabel());
-    }
-
-    while (highlightedSatelliteIds.length < highlightedSatelliteLabels.length) {
-      const x = highlightedSatelliteLabels.pop()!;
-      x.label.dispose();
-      x.offscreenPointer.dispose();
-    }
-
-    for (const [
-      index,
-      { label, offscreenPointer },
-    ] of highlightedSatelliteLabels.entries()) {
-      label.update(highlightedSatelliteIds[index]);
-      offscreenPointer.update(highlightedSatelliteIds[index]);
-    }
+    highlightedSatelliteLabels.update();
 
     stats.update();
 
@@ -313,6 +285,7 @@ export function startSkyViewRenderer({
     satellitePositions.dispose();
 
     selectedSatelliteOffscreenPointer.dispose();
+    highlightedSatelliteLabels.dispose();
 
     renderer.setAnimationLoop(null);
     renderer.dispose();
