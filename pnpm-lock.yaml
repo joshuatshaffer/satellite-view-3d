@@ -5,9 +5,6 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  eruda:
-    specifier: 3.2.1
-    version: 3.2.1
   idb:
     specifier: 8.0.1
     version: 8.0.1
@@ -1323,10 +1320,6 @@ packages:
       prr: 1.0.1
     dev: true
     optional: true
-
-  /eruda@3.2.1:
-    resolution: {integrity: sha512-iophjRvysx2ndIhqos+WpGUpou0BHGZOYcLld8oB65oH9+Cz7FExC5xEJ/ulzxpWoqw4Kh8gM7spuaGJhz0UeA==}
-    dev: false
 
   /es-module-lexer@1.5.4:
     resolution: {integrity: sha512-MVNK56NiMrOwitFB7cqDwq0CQutbw+0BvLshJSse0MUNU+y1FC3bUS/AQg7oUng+/wKrrki7JfmwtVHkVfPLlw==}
