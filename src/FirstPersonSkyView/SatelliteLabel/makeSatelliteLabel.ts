@@ -43,5 +43,10 @@ export function makeSatelliteLabel(
     );
   };
 
-  return { update };
+  const dispose = () => {
+    scene.remove(label);
+    label.element.remove();
+  };
+
+  return { update, dispose };
 }

@@ -235,17 +235,19 @@ export function startSkyViewRenderer({
     camera,
   });
 
+  const makeHighlightedSatelliteLabel = () => ({
+    label: makeSatelliteLabel(scene, satellitePositions, store),
+    offscreenPointer: makeSatelliteOffscreenPointer({
+      hudRoot,
+      satellitePositions,
+      store,
+      camera,
+    }),
+  });
+
   const highlightedSatelliteLabels = Array.from(
     { length: store.get(highlightedSatelliteIdsAtom).length },
-    () => ({
-      label: makeSatelliteLabel(scene, satellitePositions, store),
-      offscreenPointer: makeSatelliteOffscreenPointer({
-        hudRoot,
-        satellitePositions,
-        store,
-        camera,
-      }),
-    })
+    makeHighlightedSatelliteLabel
   );
 
   const onWindowResize = () => {
@@ -274,6 +276,17 @@ export function startSkyViewRenderer({
     );
 
     const highlightedSatelliteIds = store.get(highlightedSatelliteIdsAtom);
+
+    while (highlightedSatelliteIds.length > highlightedSatelliteLabels.length) {
+      highlightedSatelliteLabels.push(makeHighlightedSatelliteLabel());
+    }
+
+    while (highlightedSatelliteIds.length < highlightedSatelliteLabels.length) {
+      const x = highlightedSatelliteLabels.pop()!;
+      x.label.dispose();
+      x.offscreenPointer.dispose();
+    }
+
     for (const [
       index,
       { label, offscreenPointer },

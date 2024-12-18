@@ -1,7 +1,10 @@
-import { atom, useAtomValue } from "jotai";
+import { atom, useAtom, useAtomValue } from "jotai";
 import { satelliteDefinitionsAtom } from "./SatelliteDefinitions";
 import styles from "./SatelliteDetails.module.css";
-import { selectedSatelliteIdAtom } from "./urlAtom";
+import {
+  highlightedSatelliteIdsAtom,
+  selectedSatelliteIdAtom,
+} from "./urlAtom";
 
 const selectedSatelliteDefinitionAtom = atom((get) => {
   const selectedSatelliteId = get(selectedSatelliteIdAtom);
@@ -26,6 +29,8 @@ export function SatelliteDetails() {
       <span>
         {definition?.displayName ?? `Satellite ${selectedSatelliteId}`}
       </span>
+      <br />
+      <HighlightedToggle satelliteId={selectedSatelliteId} />
       <br />
       <a
         href={`https://www.n2yo.com/satellite/?s=${encodeURIComponent(
@@ -59,5 +64,40 @@ export function SatelliteDetails() {
       <br />
       &nbsp;
     </div>
+  );
+}
+
+function HighlightedToggle({ satelliteId }: { satelliteId: string }) {
+  const [highlightedSatelliteIds, setHighlightedSatelliteIds] = useAtom(
+    highlightedSatelliteIdsAtom
+  );
+
+  const isHighlighted = highlightedSatelliteIds.includes(satelliteId);
+
+  const setIsHighlighted = (isHighlighted: boolean) => {
+    if (isHighlighted) {
+      setHighlightedSatelliteIds(
+        highlightedSatelliteIds.includes(satelliteId)
+          ? highlightedSatelliteIds
+          : [...highlightedSatelliteIds, satelliteId]
+      );
+    } else {
+      setHighlightedSatelliteIds(
+        highlightedSatelliteIds.filter((id) => id !== satelliteId)
+      );
+    }
+  };
+
+  return (
+    <label>
+      <input
+        type="checkbox"
+        checked={isHighlighted}
+        onChange={(e) => {
+          setIsHighlighted(e.target.checked);
+        }}
+      />{" "}
+      Highlighted
+    </label>
   );
 }
