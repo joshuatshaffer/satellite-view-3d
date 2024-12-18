@@ -29,7 +29,13 @@ function writeStateToUrl(state: UrlState) {
     searchParams.append(highlightedSatelliteIdsKey, h);
   }
 
-  window.history.replaceState(null, "", `?${searchParams.toString()}`);
+  const searchString = searchParams.toString();
+
+  window.history.replaceState(
+    null,
+    "",
+    searchString ? `?${searchString}` : "."
+  );
 }
 
 const internalUrlStateAtom = atom(readStateFromUrl());
