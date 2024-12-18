@@ -31,16 +31,17 @@
   - Focused satellites have
     - [x] a label,
     - [ ] a path trace,
-    - [ ] and a direction pointer when not in view.
+    - [x] and a direction pointer when not in view.
 - [x] Select a satellite from the sky view.
 - [x] Drag to pan.
 - [x] Scroll or pinch to zoom.
-- [ ] Show satellite details.
+- [x] Show satellite details.
 - [ ] Show satellite path.
 - [ ] Show satellite passes.
 - [x] Auto update satellite TLEs.
+- [x] Cache satellite TLEs on client to improve performance.
 - [ ] Cache satellite TLEs on server to reduce load on CelesTrak.
 - [ ] Manual TLE input.
 - [ ] Get transponder frequencies.
 - [ ] Show doppler shift.
-- [ ] Link to other satellite tracking sites.
+- [x] Link to other satellite tracking sites.
