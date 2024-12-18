@@ -17,15 +17,15 @@ interface SatDbSchema extends DBSchema {
 
 export interface Db extends IDBPDatabase<SatDbSchema> {}
 
-let dbPromise: Promise<Db> | undefined;
-
+// TODO: Use the `using` keyword instead of `try`/`finally`.
+//
+// TODO: Reuse the database connection if `getDb` is called multiple times
+//       before closing.
 export async function getDb() {
-  dbPromise ??= openDB<SatDbSchema>("sat-db", 1, {
+  return await openDB<SatDbSchema>("sat-db", 1, {
     upgrade(db) {
       db.createObjectStore("dataSync");
       db.createObjectStore("tle");
     },
   });
-
-  return await dbPromise;
 }

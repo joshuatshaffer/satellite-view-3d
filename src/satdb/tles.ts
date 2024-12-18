@@ -21,39 +21,46 @@ async function fetchTles() {
 
 async function putTles(tles: Tle[]) {
   const db = await getDb();
-  const tx = db.transaction(["tle", "dataSync"], "readwrite");
-  await Promise.all([
-    tx.db
-      .clear("tle")
-      .then(() =>
-        Promise.all(
-          tles.map((tle) => tx.db.put("tle", tle, tle.line1.slice(2, 7)))
-        )
-      ),
-    tx.db.put("dataSync", new Date(), "tle"),
-    tx.done,
-  ]);
+  try {
+    const tx = db.transaction(["tle", "dataSync"], "readwrite");
+    await Promise.all([
+      tx.db
+        .clear("tle")
+        .then(() =>
+          Promise.all(
+            tles.map((tle) => tx.db.put("tle", tle, tle.line1.slice(2, 7)))
+          )
+        ),
+      tx.db.put("dataSync", new Date(), "tle"),
+      tx.done,
+    ]);
+  } finally {
+    db.close();
+  }
 }
 
 export async function getTles(): Promise<Tle[]> {
   const db = await getDb();
+  try {
+    // If the data is more than 2 hours old, fetch new data.
+    const lastSynced = await db.get("dataSync", "tle");
+    if (
+      lastSynced === undefined ||
+      Date.now() - lastSynced.getTime() > 2 * 60 * 60 * 1000
+    ) {
+      const tles = await fetchTles();
 
-  // If the data is more than 2 hours old, fetch new data.
-  const lastSynced = await db.get("dataSync", "tle");
-  if (
-    lastSynced === undefined ||
-    Date.now() - lastSynced.getTime() > 2 * 60 * 60 * 1000
-  ) {
-    const tles = await fetchTles();
+      // Do not wait for the update to complete before returning the TLEs so that
+      // the UI renders faster.
+      putTles(tles).catch((error) => {
+        console.error("Failed to update TLEs", error);
+      });
 
-    // Do not wait for the update to complete before returning the TLEs so that
-    // the UI renders faster.
-    putTles(tles).catch((error) => {
-      console.error("Failed to update TLEs", error);
-    });
+      return tles;
+    }
 
-    return tles;
+    return await db.getAll("tle");
+  } finally {
+    db.close();
   }
-
-  return await db.getAll("tle");
 }
