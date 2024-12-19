@@ -6,62 +6,49 @@ import { radii } from "./scenePositions";
 import { observerGdAtom } from "./settings";
 import { timeAtom } from "./Time";
 
-export class SatellitePositions {
-  public needsUpdate = false;
-  public readonly dependents = new Set<{ needsUpdate: boolean }>();
+export type SatellitePositions = ReturnType<typeof makeSatellitePositions>;
 
-  public scenePositions = new Float32Array(
-    3 * this.store.get(satelliteDefinitionsAtom).records.size
-  );
-  public readonly indexToId = new Map<number, string>();
-  public readonly idToIndex = new Map<string, number>();
+export function makeSatellitePositions(store: Store) {
+  let needsUpdate = false;
 
-  constructor(private readonly store: Store) {}
-
-  private readonly onNeedsUpdate = () => {
-    this.needsUpdate = true;
+  const onNeedsUpdate = () => {
+    needsUpdate = true;
   };
 
-  private readonly unsubscribeObserverGdAtom = this.store.sub(
-    observerGdAtom,
-    this.onNeedsUpdate
-  );
+  const unsubscribeObserverGdAtom = store.sub(observerGdAtom, onNeedsUpdate);
 
-  private readonly unsubscribeSatelliteDefinitionsAtom = this.store.sub(
+  const unsubscribeSatelliteDefinitionsAtom = store.sub(
     satelliteDefinitionsAtom,
-    this.onNeedsUpdate
+    onNeedsUpdate
   );
 
-  private readonly unsubscribeTimeAtom = this.store.sub(
-    timeAtom,
-    this.onNeedsUpdate
-  );
+  const unsubscribeTimeAtom = store.sub(timeAtom, onNeedsUpdate);
 
-  dispose() {
-    this.unsubscribeObserverGdAtom();
-    this.unsubscribeSatelliteDefinitionsAtom();
-    this.unsubscribeTimeAtom();
-  }
+  const dispose = () => {
+    unsubscribeObserverGdAtom();
+    unsubscribeSatelliteDefinitionsAtom();
+    unsubscribeTimeAtom();
+  };
 
-  update() {
-    if (!this.needsUpdate) {
+  const update = () => {
+    if (!needsUpdate) {
       return;
     }
-    this.needsUpdate = false;
+    needsUpdate = false;
 
-    const { records } = this.store.get(satelliteDefinitionsAtom);
-    const nowDate = this.store.get(timeAtom);
+    const { records } = store.get(satelliteDefinitionsAtom);
+    const nowDate = store.get(timeAtom);
 
-    if (records.size * 3 > this.scenePositions.length) {
-      this.scenePositions = new Float32Array(3 * records.size);
+    if (records.size * 3 > satellitePositions.scenePositions.length) {
+      satellitePositions.scenePositions = new Float32Array(3 * records.size);
     }
 
     const nowGmst = satellite.gstime(nowDate);
 
-    const observerGd = this.store.get(observerGdAtom);
+    const observerGd = store.get(observerGdAtom);
 
-    this.indexToId.clear();
-    this.idToIndex.clear();
+    satellitePositions.indexToId.clear();
+    satellitePositions.idToIndex.clear();
     for (const [id, record] of records) {
       const positionAndVelocity = satellite.propagate(record, nowDate);
 
@@ -75,19 +62,34 @@ export class SatellitePositions {
 
       const lookAngles = satellite.ecfToLookAngles(observerGd, positionEcf);
 
-      const index = this.indexToId.size;
+      const index = satellitePositions.indexToId.size;
 
-      this.scenePositions.set(
+      satellitePositions.scenePositions.set(
         lookAnglesToPosition(lookAngles, radii.satellitePoint).toArray(),
         index * 3
       );
 
-      this.indexToId.set(index, id);
-      this.idToIndex.set(id, index);
+      satellitePositions.indexToId.set(index, id);
+      satellitePositions.idToIndex.set(id, index);
     }
 
-    for (const dependent of this.dependents) {
+    for (const dependent of satellitePositions.dependents) {
       dependent.needsUpdate = true;
     }
-  }
+  };
+
+  const satellitePositions = {
+    dependents: new Set<{ needsUpdate: boolean }>(),
+
+    scenePositions: new Float32Array(
+      3 * store.get(satelliteDefinitionsAtom).records.size
+    ),
+    indexToId: new Map<number, string>(),
+    idToIndex: new Map<string, number>(),
+
+    update,
+    dispose,
+  };
+
+  return satellitePositions;
 }

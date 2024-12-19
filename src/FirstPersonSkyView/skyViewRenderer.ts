@@ -13,8 +13,8 @@ import { satelliteAtPointer } from "./satelliteAtPointer";
 import { SatelliteDefinition, setSatellitesAtom } from "./SatelliteDefinitions";
 import { makeSatelliteLabel } from "./SatelliteLabel/makeSatelliteLabel";
 import { makeSatelliteOffscreenPointer } from "./SatelliteLabel/makeSatelliteOffscreenPointer";
-import { SatellitePoints } from "./SatellitePoints";
-import { SatellitePositions } from "./SatellitePositions";
+import { makeSatellitePoints } from "./SatellitePoints";
+import { makeSatellitePositions } from "./SatellitePositions";
 import { dragScaleAtom, lookScaleAtom, viewControlModeAtom } from "./settings";
 import { timeAtom } from "./Time";
 import { selectedSatelliteIdAtom } from "./urlAtom";
@@ -175,9 +175,9 @@ export function startSkyViewRenderer({
     );
   });
 
-  const satellitePositions = new SatellitePositions(store);
+  const satellitePositions = makeSatellitePositions(store);
 
-  const satellitePoints = new SatellitePoints(satellitePositions);
+  const satellitePoints = makeSatellitePoints(satellitePositions);
   scene.add(satellitePoints.points);
 
   const hoverLabel = makeSatelliteLabel(scene, satellitePositions, store);

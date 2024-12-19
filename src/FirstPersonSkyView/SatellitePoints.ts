@@ -1,56 +1,52 @@
 import { BufferAttribute, BufferGeometry, Points, PointsMaterial } from "three";
 import { SatellitePositions } from "./SatellitePositions";
 
-export class SatellitePoints {
-  public needsUpdate = false;
-
-  public readonly points = new Points(
+export function makeSatellitePoints(satellitePositions: SatellitePositions) {
+  const points = new Points(
     new BufferGeometry(),
     new PointsMaterial({ size: 2, color: 0xff0000, sizeAttenuation: false })
   );
 
-  constructor(private readonly satellitePositions: SatellitePositions) {
-    this.points.geometry.setAttribute(
-      "position",
-      new BufferAttribute(this.satellitePositions.scenePositions, 3)
-    );
-    this.points.geometry.setDrawRange(
-      0,
-      this.satellitePositions.indexToId.size
-    );
+  points.geometry.setAttribute(
+    "position",
+    new BufferAttribute(satellitePositions.scenePositions, 3)
+  );
+  points.geometry.setDrawRange(0, satellitePositions.indexToId.size);
 
-    this.satellitePositions.dependents.add(this);
-  }
+  const dependencyRef = {
+    needsUpdate: false,
+  };
 
-  dispose() {
-    this.satellitePositions.dependents.delete(this);
-    this.points.geometry.dispose();
-    this.points.material.dispose();
-  }
+  satellitePositions.dependents.add(dependencyRef);
 
-  update() {
-    if (!this.needsUpdate) {
+  const dispose = () => {
+    satellitePositions.dependents.delete(dependencyRef);
+    points.geometry.dispose();
+    points.material.dispose();
+  };
+
+  const update = () => {
+    if (!dependencyRef.needsUpdate) {
       return;
     }
-    this.needsUpdate = false;
+    dependencyRef.needsUpdate = false;
 
     if (
-      this.points.geometry.attributes.position.array !==
-      this.satellitePositions.scenePositions
+      points.geometry.attributes.position.array !==
+      satellitePositions.scenePositions
     ) {
       console.log("Recreating geometry");
-      this.points.geometry.dispose();
-      this.points.geometry = new BufferGeometry();
-      this.points.geometry.setAttribute(
+      points.geometry.dispose();
+      points.geometry = new BufferGeometry();
+      points.geometry.setAttribute(
         "position",
-        new BufferAttribute(this.satellitePositions.scenePositions, 3)
+        new BufferAttribute(satellitePositions.scenePositions, 3)
       );
     }
 
-    this.points.geometry.setDrawRange(
-      0,
-      this.satellitePositions.indexToId.size
-    );
-    this.points.geometry.attributes.position.needsUpdate = true;
-  }
+    points.geometry.setDrawRange(0, satellitePositions.indexToId.size);
+    points.geometry.attributes.position.needsUpdate = true;
+  };
+
+  return { points, update, dispose };
 }
