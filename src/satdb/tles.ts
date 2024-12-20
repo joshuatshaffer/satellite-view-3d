@@ -1,7 +1,13 @@
 import { getDb, Tle } from "./db";
+import { daysToMs } from "./ms";
 
 const tleUrl =
   "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle";
+
+/**
+ * CelesTrak updates the TLEs at most every 2 hours.
+ */
+const tleMaxAgeMs = 1 * daysToMs;
 
 async function fetchTles() {
   const response = await fetch(tleUrl);
@@ -46,7 +52,7 @@ export async function getTles(): Promise<Tle[]> {
     const lastSynced = await db.get("dataSync", "tle");
     if (
       lastSynced === undefined ||
-      Date.now() - lastSynced.getTime() > 2 * 60 * 60 * 1000
+      Date.now() - lastSynced.getTime() > tleMaxAgeMs
     ) {
       const tles = await fetchTles();
 
