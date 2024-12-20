@@ -54,15 +54,20 @@ export async function getTles(): Promise<Tle[]> {
       lastSynced === undefined ||
       Date.now() - lastSynced.getTime() > tleMaxAgeMs
     ) {
-      const tles = await fetchTles();
+      try {
+        const tles = await fetchTles();
 
-      // Do not wait for the update to complete before returning the TLEs so that
-      // the UI renders faster.
-      putTles(tles).catch((error) => {
-        console.error("Failed to update TLEs", error);
-      });
+        // Do not wait for the update to complete before returning the TLEs so that
+        // the UI renders faster.
+        putTles(tles).catch((error) => {
+          console.error("Failed to save TLEs to IndexedDB", error);
+        });
 
-      return tles;
+        return tles;
+      } catch (error) {
+        console.error("Failed to fetch TLEs", error);
+        // If fetching fails, return the cached TLEs.
+      }
     }
 
     return await db.getAll("tle");
