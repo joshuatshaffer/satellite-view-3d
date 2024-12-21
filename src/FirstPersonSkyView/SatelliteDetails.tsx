@@ -29,7 +29,7 @@ export function SatelliteDetails() {
       <span>
         {definition?.displayName ?? `Satellite ${selectedSatelliteId}`}
       </span>
-      <br />
+      <div>NORAD ID: {selectedSatelliteId}</div>
       <HighlightedToggle satelliteId={selectedSatelliteId} />
       <br />
       <a
