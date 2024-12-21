@@ -31,37 +31,7 @@ export function SatelliteDetails() {
       </span>
       <div>NORAD ID: {selectedSatelliteId}</div>
       <HighlightedToggle satelliteId={selectedSatelliteId} />
-      <br />
-      <a
-        href={`https://www.n2yo.com/satellite/?s=${encodeURIComponent(
-          selectedSatelliteId
-        )}`}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        View on N2YO.com
-      </a>
-      <br />
-      <a
-        href={`https://db.satnogs.org/search/?q=${encodeURIComponent(
-          selectedSatelliteId
-        )}`}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Search SatNOGS DB
-      </a>
-      <br />
-      <a
-        href={`https://app.keeptrack.space/?sat=${encodeURIComponent(
-          selectedSatelliteId
-        )}`}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        View in KeepTrack
-      </a>
-      <br />
+      <ExternalLinks satelliteId={selectedSatelliteId} />
       &nbsp;
     </div>
   );
@@ -99,5 +69,47 @@ function HighlightedToggle({ satelliteId }: { satelliteId: string }) {
       />{" "}
       Highlighted
     </label>
+  );
+}
+
+function ExternalLinks({ satelliteId }: { satelliteId: string }) {
+  const encodedSatelliteId = encodeURIComponent(satelliteId);
+  const links = [
+    {
+      text: "N2YO.com",
+      url: `https://www.n2yo.com/satellite/?s=${encodedSatelliteId}`,
+    },
+    {
+      text: "SatNOGS DB",
+      url: `https://db.satnogs.org/search/?q=${encodedSatelliteId}`,
+    },
+    {
+      text: "KeepTrack",
+      url: `https://app.keeptrack.space/?sat=${encodedSatelliteId}`,
+    },
+    {
+      text: "In-The-Sky.org",
+      url: `https://in-the-sky.org/spacecraft.php?id=${encodedSatelliteId}`,
+    },
+    {
+      text: "Heavens-Above",
+      url: `https://heavens-above.com/satinfo.aspx?satid=${encodedSatelliteId}`,
+    },
+    {
+      text: "Satcat",
+      url: `https://www.satcat.com/sats/${encodedSatelliteId}`,
+    },
+  ];
+
+  return (
+    <ul>
+      {links.map(({ url, text }) => (
+        <li key={url}>
+          <a href={url} target="_blank" rel="noopener noreferrer">
+            {text}
+          </a>
+        </li>
+      ))}
+    </ul>
   );
 }
