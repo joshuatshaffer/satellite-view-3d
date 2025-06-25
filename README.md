@@ -46,6 +46,16 @@
 - [ ] Show doppler shift.
 - [x] Link to other satellite tracking sites.
 
+### Search UI
+
+- [ ] The search UI overlays on the sky view.
+- [ ] The active search filters which satellites are displayed in the sky view.
+- [ ] The active search is not cleared when closing/minimizing the search UI.
+- [ ] Searches can be saved.
+- [ ] Searches can be assigned a color. Satellites matching a search will be highlighted in the sky view with the search's color.
+- [ ] Remember recently used searches.
+- [ ] Selecting a satellite from the search results list focusses it in the sky view.
+
 ## Special Thanks
 
 Thank you [Saveitforparts](https://www.youtube.com/@saveitforparts) and [dereksgc](https://www.youtube.com/@dereksgc) for inspiring me to get back into amateur radio and satellite tracking.
