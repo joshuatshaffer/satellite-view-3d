@@ -18,6 +18,8 @@
 ## To Do
 
 - [x] Zoom in/out.
+- [ ] Make this an installable PWA with offline support.
+  - [ ] Offline support for viewing satellites using locally saved data.
 - [ ] Show status of geolocation.
 - [ ] Show status of device orientation.
 - [ ] Try to make device orientation work in iOS.
