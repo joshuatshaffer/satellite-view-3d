@@ -17,6 +17,8 @@
 
 ## To Do
 
+- [ ] Move control panel to the right side.
+- [x] Stop labels from scrolling when the control panel scrolls.
 - [x] Zoom in/out.
 - [ ] Make this an installable PWA with offline support.
   - [ ] Offline support for viewing satellites using locally saved data.

@@ -93,9 +93,6 @@ export function startSkyViewRenderer({
 
   const labelRenderer = new CSS2DRenderer({ element: labelRoot });
   labelRenderer.setSize(window.innerWidth, window.innerHeight);
-  labelRenderer.domElement.style.position = "absolute";
-  labelRenderer.domElement.style.top = "0px";
-  labelRenderer.domElement.style.pointerEvents = "none";
 
   lifeCycleCallbacks.push({
     update: () => {
