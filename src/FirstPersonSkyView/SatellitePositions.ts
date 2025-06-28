@@ -30,7 +30,15 @@ export function makeSatellitePositions(store: Store) {
     unsubscribeTimeAtom();
   };
 
+  let updatesToSkip = 0;
+
   const update = () => {
+    if (updatesToSkip > 0) {
+      --updatesToSkip;
+      return;
+    }
+    updatesToSkip = 100;
+
     if (!needsUpdate) {
       return;
     }
