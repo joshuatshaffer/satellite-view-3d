@@ -1,5 +1,5 @@
 import { ReactNode, useId } from "react";
-import { isElementOf } from "../isElementOf";
+import { isElementOf } from "../../isElementOf";
 import styles from "./Field.module.css";
 
 interface SelectFieldProps<T extends string> {

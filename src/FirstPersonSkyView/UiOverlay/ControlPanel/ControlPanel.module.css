@@ -8,9 +8,7 @@
   padding: 0.5em;
   margin-left: auto;
   width: max-content;
-}
 
-.controlPanel[open] {
   background-color: #a6a6a63c;
   backdrop-filter: blur(2px);
 }

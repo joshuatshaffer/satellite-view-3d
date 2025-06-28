@@ -1,11 +1,11 @@
 import { useAtom } from "jotai";
-import { degToDms, formatAngleUnits } from "../AngleUnits";
-import { coordinatesToGridCode } from "../MaidenheadLocator";
+import { degToDms, formatAngleUnits } from "../../AngleUnits";
+import { coordinatesToGridCode } from "../../MaidenheadLocator";
 import {
   observerPositionAtom,
   observerPositionModeAtom,
   observerPositionModes,
-} from "../settings";
+} from "../../settings";
 import { NumberField } from "./NumberField";
 import { SelectField } from "./SelectField";
 
@@ -23,7 +23,7 @@ export function ObserverPositionSettings() {
           ({
             currentPosition: "Current position",
             manual: "Manual",
-          }[option])
+          })[option]
         }
         value={mode}
         onChange={setMode}

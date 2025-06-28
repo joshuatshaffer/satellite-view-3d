@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { backgroundSettingAtom, backgroundSettingValues } from "../settings";
+import { backgroundSettingAtom, backgroundSettingValues } from "../../settings";
 import { SelectField } from "./SelectField";
 
 export function BackgroundSettings() {
@@ -13,7 +13,7 @@ export function BackgroundSettings() {
         ({
           none: "None",
           cameraPassthrough: "Camera Passthrough",
-        }[option])
+        })[option]
       }
       value={background}
       onChange={setBackground}

@@ -4,7 +4,7 @@ import {
   lookScaleAtom,
   viewControlModeAtom,
   viewControlModes,
-} from "../settings";
+} from "../../settings";
 import { NumberField } from "./NumberField";
 import { SelectField } from "./SelectField";
 
@@ -23,7 +23,7 @@ export function ViewControlSettings() {
             drag: "Drag",
             look: "Look",
             deviceOrientation: "Device Orientation",
-          }[option])
+          })[option]
         }
         value={viewControlMode}
         onChange={setViewControlMode}

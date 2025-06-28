@@ -1,0 +1,31 @@
+.uiOverlay {
+  /* Isolate the stacking context so that the UI is always on top of the 3D labels. */
+  position: relative;
+
+  pointer-events: none;
+}
+
+.uiOverlay > * {
+  pointer-events: initial;
+}
+
+.menuBar {
+  width: max-content;
+  margin-left: auto;
+}
+
+.tabButton {
+  padding: 0;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+
+  width: 32px;
+  height: 32px;
+}
+
+.tabButton[aria-selected="true"] {
+  background-color: #a6a6a63c;
+  backdrop-filter: blur(2px);
+}

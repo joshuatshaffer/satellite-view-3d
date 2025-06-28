@@ -5,11 +5,11 @@ import { ViewControlSettings } from "./ViewControlSettings";
 
 export function ControlPanel() {
   return (
-    <details className={styles.controlPanel}>
-      <summary>Control Panel</summary>
+    <div className={styles.controlPanel}>
+      <div>Control Panel</div>
       <BackgroundSettings />
       <ViewControlSettings />
       <ObserverPositionSettings />
-    </details>
+    </div>
   );
 }
