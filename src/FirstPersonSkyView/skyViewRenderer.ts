@@ -44,8 +44,28 @@ export function startSkyViewRenderer({
 }) {
   console.log("Initializing AR overlay");
 
-  const stats = new Stats();
-  document.body.appendChild(stats.dom);
+  const lifeCycleCallbacks: { update?: () => void; dispose?: () => void }[] =
+    [];
+
+  lifeCycleCallbacks.push({
+    update: () => {
+      store.set(timeAtom, new Date());
+    },
+  });
+
+  {
+    const stats = new Stats();
+    document.body.appendChild(stats.dom);
+
+    lifeCycleCallbacks.push({
+      update: () => {
+        stats.update();
+      },
+      dispose: () => {
+        stats.dom.remove();
+      },
+    });
+  }
 
   const scene = new Scene();
   const camera = new PerspectiveCamera(
@@ -61,15 +81,36 @@ export function startSkyViewRenderer({
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setAnimationLoop(animate);
 
+  lifeCycleCallbacks.push({
+    update: () => {
+      renderer.render(scene, camera);
+    },
+    dispose: () => {
+      renderer.setAnimationLoop(null);
+      renderer.dispose();
+    },
+  });
+
   const labelRenderer = new CSS2DRenderer({ element: labelRoot });
   labelRenderer.setSize(window.innerWidth, window.innerHeight);
   labelRenderer.domElement.style.position = "absolute";
   labelRenderer.domElement.style.top = "0px";
   labelRenderer.domElement.style.pointerEvents = "none";
 
-  const grid = makeGrid(camera);
+  lifeCycleCallbacks.push({
+    update: () => {
+      labelRenderer.render(scene, camera);
+    },
+    dispose: () => {
+      labelRenderer.domElement.innerHTML = "";
+    },
+  });
 
-  scene.add(grid.gridRoot);
+  {
+    const grid = makeGrid(camera);
+    scene.add(grid.gridRoot);
+    lifeCycleCallbacks.push(grid);
+  }
 
   const onClick = (pointerPosition: PointerPosition) => {
     store.set(
@@ -83,23 +124,40 @@ export function startSkyViewRenderer({
     );
   };
 
-  const deviceOrientationControls = makeDeviceOrientationControls(camera);
+  {
+    const deviceOrientationControls = makeDeviceOrientationControls(camera);
 
-  const updateActiveControls = () => {
-    const viewControlMode = store.get(viewControlModeAtom);
+    lifeCycleCallbacks.push({
+      update: () => {
+        deviceOrientationControls.update();
+      },
+      dispose: () => {
+        deviceOrientationControls.disable();
+      },
+    });
 
-    if (viewControlMode === "deviceOrientation") {
-      deviceOrientationControls.enable();
-    } else {
-      deviceOrientationControls.disable();
-    }
-  };
+    const updateActiveControls = () => {
+      const viewControlMode = store.get(viewControlModeAtom);
 
-  updateActiveControls();
-  const unsubscribeViewControlModeAtom = store.sub(
-    viewControlModeAtom,
-    updateActiveControls
-  );
+      if (viewControlMode === "deviceOrientation") {
+        deviceOrientationControls.enable();
+      } else {
+        deviceOrientationControls.disable();
+      }
+    };
+
+    updateActiveControls();
+    const unsubscribeViewControlModeAtom = store.sub(
+      viewControlModeAtom,
+      updateActiveControls
+    );
+
+    lifeCycleCallbacks.push({
+      dispose: () => {
+        unsubscribeViewControlModeAtom();
+      },
+    });
+  }
 
   let zoom = 1;
   const onZoom = (delta: number) => {
@@ -162,6 +220,7 @@ export function startSkyViewRenderer({
     onClick,
     onZoom,
   });
+  lifeCycleCallbacks.push(inputs);
 
   getTles().then((tles) => {
     store.set(
@@ -176,121 +235,143 @@ export function startSkyViewRenderer({
   });
 
   const satellitePositions = makeSatellitePositions(store);
+  lifeCycleCallbacks.push(satellitePositions);
 
   const satellitePoints = makeSatellitePoints(satellitePositions);
   scene.add(satellitePoints.points);
-
-  const hoverLabel = makeSatelliteLabel(scene, satellitePositions, store);
-
-  const updateHover = () => {
-    const inputState = inputs.getInputState();
-    const pointerPosition =
-      inputState.mightClick ?? inputState.hoveringPointers[0];
-
-    const hoveredSatelliteId = pointerPosition
-      ? satelliteAtPointer({
-          pointerPosition,
-          satellitePositions,
-          camera,
-          canvas,
-        })
-      : undefined;
-
-    hoverLabel.update(hoveredSatelliteId);
-
-    if (hoveredSatelliteId) {
-      canvas.style.cursor = "pointer";
-    } else {
-      const viewControlMode = store.get(viewControlModeAtom);
-
-      if (viewControlMode === "drag") {
-        if (inputState.downPointers.length > 0) {
-          canvas.style.cursor = "grabbing";
-        } else {
-          canvas.style.cursor = "grab";
-        }
-      } else if (viewControlMode === "look") {
-        if (inputState.downPointers.length > 0) {
-          canvas.style.cursor = "none";
-        } else {
-          canvas.style.cursor = "move";
-        }
-      } else {
-        canvas.style.cursor = "default";
-      }
-    }
-  };
-
-  const selectedSatelliteLabel = makeSatelliteLabel(
-    scene,
-    satellitePositions,
-    store
-  );
-  const selectedSatelliteOffscreenPointer = makeSatelliteOffscreenPointer({
-    hudRoot,
-    satellitePositions,
-    store,
-    camera,
+  lifeCycleCallbacks.push({
+    update: () => {
+      satellitePoints.update();
+    },
+    dispose: () => {
+      scene.remove(satellitePoints.points);
+      satellitePoints.dispose();
+    },
   });
 
-  const highlightedSatelliteLabels = makeHighlightedSatelliteLabels({
-    scene,
-    hudRoot,
-    satellitePositions,
-    store,
-    camera,
-  });
+  {
+    const hoverLabel = makeSatelliteLabel(scene, satellitePositions, store);
 
-  const onWindowResize = () => {
-    // TODO: Update FOV when screen rotates. FOV is for the width of the screen.
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+    lifeCycleCallbacks.push({
+      update: () => {
+        const inputState = inputs.getInputState();
+        const pointerPosition =
+          inputState.mightClick ?? inputState.hoveringPointers[0];
 
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    labelRenderer.setSize(window.innerWidth, window.innerHeight);
-  };
+        const hoveredSatelliteId = pointerPosition
+          ? satelliteAtPointer({
+              pointerPosition,
+              satellitePositions,
+              camera,
+              canvas,
+            })
+          : undefined;
 
-  window.addEventListener("resize", onWindowResize);
+        hoverLabel.update(hoveredSatelliteId);
+
+        if (hoveredSatelliteId) {
+          canvas.style.cursor = "pointer";
+        } else {
+          const viewControlMode = store.get(viewControlModeAtom);
+
+          if (viewControlMode === "drag") {
+            if (inputState.downPointers.length > 0) {
+              canvas.style.cursor = "grabbing";
+            } else {
+              canvas.style.cursor = "grab";
+            }
+          } else if (viewControlMode === "look") {
+            if (inputState.downPointers.length > 0) {
+              canvas.style.cursor = "none";
+            } else {
+              canvas.style.cursor = "move";
+            }
+          } else {
+            canvas.style.cursor = "default";
+          }
+        }
+      },
+      dispose: () => {
+        hoverLabel.dispose();
+      },
+    });
+  }
+
+  {
+    const selectedSatelliteLabel = makeSatelliteLabel(
+      scene,
+      satellitePositions,
+      store
+    );
+    lifeCycleCallbacks.push({
+      update: () => {
+        selectedSatelliteLabel.update(store.get(selectedSatelliteIdAtom));
+      },
+    });
+  }
+
+  {
+    const selectedSatelliteOffscreenPointer = makeSatelliteOffscreenPointer({
+      hudRoot,
+      satellitePositions,
+      store,
+      camera,
+    });
+    lifeCycleCallbacks.push({
+      update: () => {
+        selectedSatelliteOffscreenPointer.update(
+          store.get(selectedSatelliteIdAtom)
+        );
+      },
+      dispose: () => {
+        selectedSatelliteOffscreenPointer.dispose();
+      },
+    });
+  }
+
+  {
+    const highlightedSatelliteLabels = makeHighlightedSatelliteLabels({
+      scene,
+      hudRoot,
+      satellitePositions,
+      store,
+      camera,
+    });
+    lifeCycleCallbacks.push(highlightedSatelliteLabels);
+  }
+
+  {
+    const onWindowResize = () => {
+      // TODO: Update FOV when screen rotates. FOV is for the width of the screen.
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    };
+
+    window.addEventListener("resize", onWindowResize);
+
+    lifeCycleCallbacks.push({
+      dispose: () => {
+        window.removeEventListener("resize", onWindowResize);
+      },
+    });
+  }
 
   function animate() {
-    store.set(timeAtom, new Date());
-    satellitePositions.update();
-    satellitePoints.update();
-    updateHover();
-    selectedSatelliteLabel.update(store.get(selectedSatelliteIdAtom));
-
-    deviceOrientationControls.update();
-
-    grid.update();
-    selectedSatelliteOffscreenPointer.update(
-      store.get(selectedSatelliteIdAtom)
-    );
-    highlightedSatelliteLabels.update();
-
-    stats.update();
-
-    renderer.render(scene, camera);
-    labelRenderer.render(scene, camera);
+    for (const x of lifeCycleCallbacks) {
+      x.update?.();
+    }
   }
 
   return () => {
     console.log("Cleaning up AR overlay");
 
-    inputs.dispose();
-    unsubscribeViewControlModeAtom();
-    deviceOrientationControls.disable();
-
-    scene.remove(satellitePoints.points);
-    satellitePoints.dispose();
-    satellitePositions.dispose();
-
-    selectedSatelliteOffscreenPointer.dispose();
-    highlightedSatelliteLabels.dispose();
-
-    renderer.setAnimationLoop(null);
-    renderer.dispose();
-    stats.dom.remove();
-    labelRenderer.domElement.innerHTML = "";
-    window.removeEventListener("resize", onWindowResize);
+    // Dispose in reverse order so that items are disposed before their
+    // dependencies.
+    for (const x of lifeCycleCallbacks.reverse()) {
+      x.dispose?.();
+    }
   };
 }
