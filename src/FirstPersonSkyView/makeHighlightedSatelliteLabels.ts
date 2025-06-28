@@ -2,7 +2,7 @@ import { PerspectiveCamera, Scene } from "three";
 import { Store } from "./jotai-types";
 import { makeSatelliteLabel } from "./SatelliteLabel/makeSatelliteLabel";
 import { makeSatelliteOffscreenPointer } from "./SatelliteLabel/makeSatelliteOffscreenPointer";
-import { SatellitePositions } from "./SatellitePositions";
+import { SatellitePositions } from "./SatellitePositions/SatellitePositions";
 import { highlightedSatelliteIdsAtom } from "./urlAtom";
 
 export function makeHighlightedSatelliteLabels({

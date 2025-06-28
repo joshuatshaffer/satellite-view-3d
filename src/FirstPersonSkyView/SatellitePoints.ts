@@ -1,5 +1,5 @@
 import { BufferAttribute, BufferGeometry, Points, PointsMaterial } from "three";
-import { SatellitePositions } from "./SatellitePositions";
+import { SatellitePositions } from "./SatellitePositions/SatellitePositions";
 
 export function makeSatellitePoints(satellitePositions: SatellitePositions) {
   const points = new Points(

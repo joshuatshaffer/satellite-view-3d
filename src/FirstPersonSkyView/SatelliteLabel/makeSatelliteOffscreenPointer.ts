@@ -2,7 +2,7 @@ import { PerspectiveCamera, Vector3 } from "three";
 import { Store } from "../jotai-types";
 import { ndcInView } from "../ndcInView";
 import { satelliteDefinitionsAtom } from "../SatelliteDefinitions";
-import { SatellitePositions } from "../SatellitePositions";
+import { SatellitePositions } from "../SatellitePositions/SatellitePositions";
 import styles from "./satelliteOffscreenPointer.module.scss";
 
 export function makeSatelliteOffscreenPointer({

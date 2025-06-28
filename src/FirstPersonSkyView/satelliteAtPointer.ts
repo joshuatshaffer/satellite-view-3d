@@ -1,7 +1,7 @@
 import { Camera, Matrix4, Vector3 } from "three";
 import { PointerPosition } from "./inputs";
 import { ndcInView } from "./ndcInView";
-import { SatellitePositions } from "./SatellitePositions";
+import { SatellitePositions } from "./SatellitePositions/SatellitePositions";
 
 const maxDistance = 20;
 const maxDistanceSq = maxDistance * maxDistance;

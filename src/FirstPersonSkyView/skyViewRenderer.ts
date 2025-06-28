@@ -14,7 +14,7 @@ import { SatelliteDefinition, setSatellitesAtom } from "./SatelliteDefinitions";
 import { makeSatelliteLabel } from "./SatelliteLabel/makeSatelliteLabel";
 import { makeSatelliteOffscreenPointer } from "./SatelliteLabel/makeSatelliteOffscreenPointer";
 import { makeSatellitePoints } from "./SatellitePoints";
-import { makeSatellitePositions } from "./SatellitePositions";
+import { makeSatellitePositions } from "./SatellitePositions/SatellitePositions";
 import { dragScaleAtom, lookScaleAtom, viewControlModeAtom } from "./settings";
 import { timeAtom } from "./Time";
 import { selectedSatelliteIdAtom } from "./urlAtom";

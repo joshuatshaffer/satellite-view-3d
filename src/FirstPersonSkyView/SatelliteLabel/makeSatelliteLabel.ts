@@ -2,7 +2,7 @@ import { Scene } from "three";
 import { CSS2DObject } from "three/examples/jsm/Addons.js";
 import { Store } from "../jotai-types";
 import { satelliteDefinitionsAtom } from "../SatelliteDefinitions";
-import { SatellitePositions } from "../SatellitePositions";
+import { SatellitePositions } from "../SatellitePositions/SatellitePositions";
 import styles from "../SkyViewRenderer.module.css";
 
 export function makeSatelliteLabel(

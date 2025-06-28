@@ -1,10 +1,10 @@
 import * as satellite from "satellite.js";
-import { Store } from "./jotai-types";
-import { lookAnglesToPosition } from "./lookAnglesToPosition";
-import { satelliteDefinitionsAtom } from "./SatelliteDefinitions";
-import { radii } from "./scenePositions";
-import { observerGdAtom } from "./settings";
-import { timeAtom } from "./Time";
+import { Store } from "../jotai-types";
+import { lookAnglesToPosition } from "../lookAnglesToPosition";
+import { satelliteDefinitionsAtom } from "../SatelliteDefinitions";
+import { radii } from "../scenePositions";
+import { observerGdAtom } from "../settings";
+import { timeAtom } from "../Time";
 
 export type SatellitePositions = ReturnType<typeof makeSatellitePositions>;
 
