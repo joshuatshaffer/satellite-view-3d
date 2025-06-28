@@ -6,7 +6,7 @@ import { selectedSatelliteIdAtom } from "../../urlAtom";
 import styles from "./Search.module.css";
 import { SearchInput, searchTextAtom } from "./SearchInput";
 
-const searchResultsAtom = unwrap(
+export const searchResultsAtom = unwrap(
   atom(async (get) =>
     matchSorter(
       (await getTles()).map((tle) => ({

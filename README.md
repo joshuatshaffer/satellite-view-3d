@@ -56,7 +56,8 @@
 ### Search UI
 
 - [x] The search UI overlays on the sky view.
-- [ ] The active search filters which satellites are displayed in the sky view.
+- [x] Satellites that do not match the current search are greyed out in the sky view.
+- [ ] A search can be used to filter which satellites are displayed in the sky view.
 - [x] The active search is not cleared when closing/minimizing the search UI.
 - [ ] Searches can be saved.
 - [ ] Searches can be assigned a color. Satellites matching a search will be highlighted in the sky view with the search's color.

@@ -208,7 +208,7 @@ export function startSkyViewRenderer({
   const satellitePositions = makeSatellitePositions(store);
   lifeCycleCallbacks.push(satellitePositions);
 
-  const satellitePoints = makeSatellitePoints(satellitePositions);
+  const satellitePoints = makeSatellitePoints(store, satellitePositions);
   scene.add(satellitePoints.points);
   lifeCycleCallbacks.push({
     update: () => {
