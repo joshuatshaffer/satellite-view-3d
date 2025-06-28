@@ -1,0 +1,26 @@
+.search {
+  padding: 0.5em;
+  margin-left: auto;
+  width: max-content;
+
+  background-color: #a6a6a63c;
+  backdrop-filter: blur(5px);
+}
+
+.searchResults {
+  list-style: none;
+  padding: 0;
+  margin: 1em 0 0;
+}
+
+.searchResult {
+  padding: 0.2em;
+}
+
+.searchResult:hover {
+  background-color: rgb(63, 63, 63);
+}
+
+.searchResult[data-selected="true"] {
+  background-color: rgb(0, 54, 102);
+}

@@ -14,6 +14,7 @@
   "dependencies": {
     "idb": "8.0.1",
     "jotai": "2.10.4",
+    "match-sorter": "8.0.3",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-icons": "5.5.0",

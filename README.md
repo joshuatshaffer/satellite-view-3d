@@ -26,7 +26,7 @@
 - [ ] Show status of device orientation.
 - [ ] Try to make device orientation work in iOS.
 - [ ] Search for satellites.
-  - [ ] by name
+  - [x] by name
   - [ ] by NORAD ID
   - [ ] by frequency
   - [ ] by radio mode
@@ -52,13 +52,13 @@
 
 ### Search UI
 
-- [ ] The search UI overlays on the sky view.
+- [x] The search UI overlays on the sky view.
 - [ ] The active search filters which satellites are displayed in the sky view.
-- [ ] The active search is not cleared when closing/minimizing the search UI.
+- [x] The active search is not cleared when closing/minimizing the search UI.
 - [ ] Searches can be saved.
 - [ ] Searches can be assigned a color. Satellites matching a search will be highlighted in the sky view with the search's color.
 - [ ] Remember recently used searches.
-- [ ] Selecting a satellite from the search results list focusses it in the sky view.
+- [x] Selecting a satellite from the search results list focusses it in the sky view.
 
 ## Special Thanks
 
