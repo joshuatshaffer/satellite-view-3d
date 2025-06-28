@@ -27,7 +27,7 @@
 - [ ] Try to make device orientation work in iOS.
 - [ ] Search for satellites.
   - [x] by name
-  - [ ] by NORAD ID
+  - [x] by NORAD ID
   - [ ] by frequency
   - [ ] by radio mode
 - [ ] Select/filter satellites display.

@@ -15,6 +15,9 @@
 
 .searchResult {
   padding: 0.2em;
+  display: flex;
+  gap: 1em;
+  justify-content: space-between;
 }
 
 .searchResult:hover {

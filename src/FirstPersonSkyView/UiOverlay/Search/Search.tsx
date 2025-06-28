@@ -9,9 +9,16 @@ const searchTextAtom = atom("");
 
 const searchResultsAtom = unwrap(
   atom(async (get) =>
-    matchSorter(await getTles(), get(searchTextAtom), {
-      keys: ["objectName"],
-    })
+    matchSorter(
+      (await getTles()).map((tle) => ({
+        ...tle,
+        noradId: tle.line1.slice(2, 7),
+      })),
+      get(searchTextAtom),
+      {
+        keys: ["objectName", "noradId"],
+      }
+    )
   ),
   (prev) => prev ?? []
 );
@@ -24,8 +31,7 @@ function SearchResultList() {
 
   return (
     <ul className={styles.searchResults}>
-      {results.slice(0, 30).map((tle) => {
-        const noradId = tle.line1.slice(2, 7);
+      {results.slice(0, 30).map(({ noradId, objectName }) => {
         return (
           <li
             key={noradId}
@@ -35,7 +41,7 @@ function SearchResultList() {
               setSelectedSatelliteId(noradId);
             }}
           >
-            {tle.objectName}
+            <div>{objectName}</div> <div>{noradId}</div>
           </li>
         );
       })}
