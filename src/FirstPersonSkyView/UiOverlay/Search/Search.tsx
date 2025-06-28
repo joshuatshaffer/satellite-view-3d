@@ -41,7 +41,8 @@ function SearchResultList() {
               setSelectedSatelliteId(noradId);
             }}
           >
-            <div>{objectName}</div> <div>{noradId}</div>
+            <div className={styles.searchResult_objectName}>{objectName}</div>{" "}
+            <div>{noradId}</div>
           </li>
         );
       })}
@@ -49,11 +50,11 @@ function SearchResultList() {
   );
 }
 
-export function Search() {
+function SearchInput() {
   const [searchText, setSearchText] = useAtom(searchTextAtom);
 
   return (
-    <div className={styles.search}>
+    <div>
       <input
         type="search"
         value={searchText}
@@ -69,7 +70,14 @@ export function Search() {
       >
         X
       </button>
+    </div>
+  );
+}
 
+export function Search() {
+  return (
+    <div className={styles.search}>
+      <SearchInput />
       <SearchResultList />
     </div>
   );
