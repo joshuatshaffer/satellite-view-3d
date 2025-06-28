@@ -76,39 +76,6 @@ export function startSkyViewRenderer({
     1000
   );
 
-  const renderer = new WebGLRenderer({ canvas, alpha: true });
-  renderer.setClearColor(0x000000, 0);
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setAnimationLoop(animate);
-
-  lifeCycleCallbacks.push({
-    update: () => {
-      renderer.render(scene, camera);
-    },
-    dispose: () => {
-      renderer.setAnimationLoop(null);
-      renderer.dispose();
-    },
-  });
-
-  const labelRenderer = new CSS2DRenderer({ element: labelRoot });
-  labelRenderer.setSize(window.innerWidth, window.innerHeight);
-
-  lifeCycleCallbacks.push({
-    update: () => {
-      labelRenderer.render(scene, camera);
-    },
-    dispose: () => {
-      labelRenderer.domElement.innerHTML = "";
-    },
-  });
-
-  {
-    const grid = makeGrid(camera);
-    scene.add(grid.gridRoot);
-    lifeCycleCallbacks.push(grid);
-  }
-
   const onClick = (pointerPosition: PointerPosition) => {
     store.set(
       selectedSatelliteIdAtom,
@@ -218,6 +185,13 @@ export function startSkyViewRenderer({
     onZoom,
   });
   lifeCycleCallbacks.push(inputs);
+
+  {
+    // Update grid after everything that could move the camera.
+    const grid = makeGrid(camera);
+    scene.add(grid.gridRoot);
+    lifeCycleCallbacks.push(grid);
+  }
 
   getTles().then((tles) => {
     store.set(
@@ -338,22 +312,51 @@ export function startSkyViewRenderer({
   }
 
   {
-    const onWindowResize = () => {
-      // TODO: Update FOV when screen rotates. FOV is for the width of the screen.
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      labelRenderer.setSize(window.innerWidth, window.innerHeight);
-    };
-
-    window.addEventListener("resize", onWindowResize);
+    const renderer = new WebGLRenderer({ canvas, alpha: true });
+    renderer.setClearColor(0x000000, 0);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setAnimationLoop(animate);
 
     lifeCycleCallbacks.push({
+      update: () => {
+        renderer.render(scene, camera);
+      },
       dispose: () => {
-        window.removeEventListener("resize", onWindowResize);
+        renderer.setAnimationLoop(null);
+        renderer.dispose();
       },
     });
+
+    const labelRenderer = new CSS2DRenderer({ element: labelRoot });
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+
+    lifeCycleCallbacks.push({
+      update: () => {
+        labelRenderer.render(scene, camera);
+      },
+      dispose: () => {
+        labelRenderer.domElement.innerHTML = "";
+      },
+    });
+
+    {
+      const onWindowResize = () => {
+        // TODO: Update FOV when screen rotates. FOV is for the width of the screen.
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        labelRenderer.setSize(window.innerWidth, window.innerHeight);
+      };
+
+      window.addEventListener("resize", onWindowResize);
+
+      lifeCycleCallbacks.push({
+        dispose: () => {
+          window.removeEventListener("resize", onWindowResize);
+        },
+      });
+    }
   }
 
   function animate() {
