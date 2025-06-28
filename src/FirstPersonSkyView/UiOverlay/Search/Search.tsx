@@ -4,8 +4,7 @@ import { matchSorter } from "match-sorter";
 import { getTles } from "../../../satdb/tles";
 import { selectedSatelliteIdAtom } from "../../urlAtom";
 import styles from "./Search.module.css";
-
-const searchTextAtom = atom("");
+import { SearchInput, searchTextAtom } from "./SearchInput";
 
 const searchResultsAtom = unwrap(
   atom(async (get) =>
@@ -47,30 +46,6 @@ function SearchResultList() {
         );
       })}
     </ul>
-  );
-}
-
-function SearchInput() {
-  const [searchText, setSearchText] = useAtom(searchTextAtom);
-
-  return (
-    <div>
-      <input
-        type="search"
-        value={searchText}
-        onChange={(event) => {
-          setSearchText(event.currentTarget.value);
-        }}
-      />
-      <button
-        type="button"
-        onClick={() => {
-          setSearchText("");
-        }}
-      >
-        X
-      </button>
-    </div>
   );
 }
 
