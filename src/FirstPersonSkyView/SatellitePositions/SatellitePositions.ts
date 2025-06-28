@@ -1,88 +1,73 @@
-import * as satellite from "satellite.js";
+import { Atom } from "jotai";
 import { Store } from "../jotai-types";
-import { lookAnglesToPosition } from "../lookAnglesToPosition";
 import { satelliteDefinitionsAtom } from "../SatelliteDefinitions";
-import { radii } from "../scenePositions";
 import { observerGdAtom } from "../settings";
 import { timeAtom } from "../Time";
+import type { Output, ToPositionsWorker } from "./worker";
+import PositionsWorker from "./worker?worker";
 
 export type SatellitePositions = ReturnType<typeof makeSatellitePositions>;
 
 export function makeSatellitePositions(store: Store) {
-  let needsUpdate = false;
+  const worker = new PositionsWorker();
 
-  const onNeedsUpdate = () => {
-    needsUpdate = true;
+  const disposeCallbacks: (() => void)[] = [];
+
+  const watchAtom = <T>(atom: Atom<T>, update: (value: T) => void) => {
+    disposeCallbacks.push(
+      store.sub(atom, () => {
+        update(store.get(atom));
+      })
+    );
+    update(store.get(atom));
   };
 
-  const unsubscribeObserverGdAtom = store.sub(observerGdAtom, onNeedsUpdate);
+  let updateMessage: ToPositionsWorker = {};
 
-  const unsubscribeSatelliteDefinitionsAtom = store.sub(
-    satelliteDefinitionsAtom,
-    onNeedsUpdate
-  );
+  watchAtom(observerGdAtom, (observerGd) => {
+    updateMessage.observerGd = observerGd;
+  });
 
-  const unsubscribeTimeAtom = store.sub(timeAtom, onNeedsUpdate);
+  watchAtom(satelliteDefinitionsAtom, ({ records }) => {
+    updateMessage.records = records;
+  });
 
-  const dispose = () => {
-    unsubscribeObserverGdAtom();
-    unsubscribeSatelliteDefinitionsAtom();
-    unsubscribeTimeAtom();
-  };
-
-  let updatesToSkip = 0;
+  watchAtom(timeAtom, (nowDate) => {
+    updateMessage.nowDate = nowDate;
+  });
 
   const update = () => {
-    if (updatesToSkip > 0) {
-      --updatesToSkip;
-      return;
+    if (Object.values(updateMessage).some((v) => v !== undefined)) {
+      worker.postMessage(updateMessage);
+      updateMessage = {};
     }
-    updatesToSkip = 100;
+  };
 
-    if (!needsUpdate) {
-      return;
-    }
-    needsUpdate = false;
+  const onMessage = (event: MessageEvent<Output>) => {
+    satellitePositions.indexToId = event.data.indexToId;
+    satellitePositions.idToIndex = event.data.idToIndex;
 
-    const { records } = store.get(satelliteDefinitionsAtom);
-    const nowDate = store.get(timeAtom);
-
-    if (records.size * 3 > satellitePositions.scenePositions.length) {
-      satellitePositions.scenePositions = new Float32Array(3 * records.size);
-    }
-
-    const nowGmst = satellite.gstime(nowDate);
-
-    const observerGd = store.get(observerGdAtom);
-
-    satellitePositions.indexToId.clear();
-    satellitePositions.idToIndex.clear();
-    for (const [id, record] of records) {
-      const positionAndVelocity = satellite.propagate(record, nowDate);
-
-      const positionEci = positionAndVelocity.position;
-
-      if (typeof positionEci !== "object") {
-        continue;
-      }
-
-      const positionEcf = satellite.eciToEcf(positionEci, nowGmst);
-
-      const lookAngles = satellite.ecfToLookAngles(observerGd, positionEcf);
-
-      const index = satellitePositions.indexToId.size;
-
-      satellitePositions.scenePositions.set(
-        lookAnglesToPosition(lookAngles, radii.satellitePoint).toArray(),
-        index * 3
-      );
-
-      satellitePositions.indexToId.set(index, id);
-      satellitePositions.idToIndex.set(id, index);
+    if (
+      satellitePositions.scenePositions.length ===
+      event.data.scenePositions.length
+    ) {
+      satellitePositions.scenePositions.set(event.data.scenePositions);
+    } else {
+      satellitePositions.scenePositions = event.data.scenePositions;
     }
 
     for (const dependent of satellitePositions.dependents) {
       dependent.needsUpdate = true;
+    }
+  };
+
+  worker.addEventListener("message", onMessage);
+
+  const dispose = () => {
+    worker.removeEventListener("message", onMessage);
+
+    for (const disposeCallback of disposeCallbacks) {
+      disposeCallback();
     }
   };
 

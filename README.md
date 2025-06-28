@@ -49,9 +49,9 @@
 - [ ] Get transponder frequencies.
 - [ ] Show doppler shift.
 - [x] Link to other satellite tracking sites.
-- [ ] Improve performance.
-  - [ ] Use a web worker for computing satellite positions.
-  - [ ] Instead of computing every frame, compute key frames and interpolate between them.
+- [x] Improve performance.
+  - [x] Use a web worker for computing satellite positions.
+  - [ ] ~~Instead of computing every frame, compute key frames and interpolate between them.~~ Not needed.
 
 ### Search UI
 
