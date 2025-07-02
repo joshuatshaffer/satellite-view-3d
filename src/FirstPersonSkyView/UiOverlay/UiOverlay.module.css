@@ -21,8 +21,8 @@
   color: inherit;
   cursor: pointer;
 
-  width: 32px;
-  height: 32px;
+  width: 2.5rem;
+  height: 2.5rem;
 }
 
 .tabButton[aria-selected="true"] {
