@@ -1,7 +1,10 @@
 import { Camera, Matrix4, Vector3 } from "three";
+import type { NoradId } from "../satdb/db";
 import { PointerPosition } from "./inputs";
+import { Store } from "./jotai-types";
 import { ndcInView } from "./ndcInView";
 import { SatellitePositions } from "./SatellitePositions/SatellitePositions";
+import { searchResultsAtom } from "./UiOverlay/Search/Search";
 
 const maxDistance = 20;
 const maxDistanceSq = maxDistance * maxDistance;
@@ -11,13 +14,15 @@ export function satelliteAtPointer({
   satellitePositions,
   camera,
   canvas,
+  store,
 }: {
   pointerPosition: PointerPosition;
   satellitePositions: SatellitePositions;
   camera: Camera;
   canvas: HTMLCanvasElement;
+  store: Store;
 }) {
-  let closestIndex: number | undefined;
+  let closestId: NoradId | undefined;
   let closestDistanceSq = Infinity;
 
   // Pre-compute the matrix for efficiency instead of using
@@ -28,7 +33,12 @@ export function satelliteAtPointer({
 
   const positionInNdc = new Vector3();
 
-  for (let i = 0; i < satellitePositions.indexToId.size; i++) {
+  for (const { noradId } of store.get(searchResultsAtom)) {
+    const i = satellitePositions.idToIndex.get(noradId);
+    if (i === undefined) {
+      continue;
+    }
+
     positionInNdc
       .set(
         satellitePositions.scenePositions[i * 3],
@@ -52,11 +62,9 @@ export function satelliteAtPointer({
 
     if (distanceSq < maxDistanceSq && distanceSq < closestDistanceSq) {
       closestDistanceSq = distanceSq;
-      closestIndex = i;
+      closestId = noradId;
     }
   }
 
-  return closestIndex
-    ? satellitePositions.indexToId.get(closestIndex)
-    : undefined;
+  return closestId;
 }

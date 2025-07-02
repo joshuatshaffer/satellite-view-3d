@@ -84,6 +84,7 @@ export function startSkyViewRenderer({
         pointerPosition,
         camera,
         canvas,
+        store,
       })
     );
   };
@@ -235,6 +236,7 @@ export function startSkyViewRenderer({
               satellitePositions,
               camera,
               canvas,
+              store,
             })
           : undefined;
 
