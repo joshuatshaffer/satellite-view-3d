@@ -40,6 +40,7 @@ export function makeGridLabels(gridRoot: Object3D, camera: PerspectiveCamera) {
         const testPoint = deviceCoordinatesToLookAngles(camera, xToDc(x));
 
         if (
+          // There is a line of elevation between testPoint and prevTestPoint.
           Math.floor(testPoint.elevation / elevationStep) !==
           Math.floor(prevTestPoint.elevation / elevationStep)
         ) {
@@ -67,6 +68,7 @@ export function makeGridLabels(gridRoot: Object3D, camera: PerspectiveCamera) {
         }
 
         if (
+          // There is a line of azimuth between testPoint and prevTestPoint.
           Math.floor(testPoint.azimuth / azimuthStep) !==
           Math.floor(prevTestPoint.azimuth / azimuthStep)
         ) {
@@ -81,12 +83,26 @@ export function makeGridLabels(gridRoot: Object3D, camera: PerspectiveCamera) {
             x
           );
 
+          /**
+           * At North there is a wrap around 360 to 0. This causes the label to
+           * be wrong without this logic. Strangely, the math for positioning
+           * the label works as it is and breaks when I apply this correction to
+           * `azimuth` directly.
+           */
+          const labelValue =
+            Math.abs(testPoint.azimuth - prevTestPoint.azimuth) > Math.PI
+              ? Math.floor(
+                  Math.min(testPoint.azimuth, prevTestPoint.azimuth) /
+                    azimuthStep
+                ) * azimuthStep
+              : azimuth;
+
           labelPool.place(
             lookAnglesToPosition(
               deviceCoordinatesToLookAngles(camera, xToDc(r)),
               radii.gridLabel
             ),
-            radToDeg(azimuth).toFixed(0) + "°",
+            radToDeg(labelValue).toFixed(0) + "°",
             center
           );
         }
