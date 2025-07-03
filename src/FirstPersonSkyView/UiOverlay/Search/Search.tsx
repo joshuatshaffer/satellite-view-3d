@@ -2,21 +2,10 @@ import { atom, useAtom, useAtomValue } from "jotai";
 import { unwrap } from "jotai/utils";
 import { matchSorter } from "match-sorter";
 import { getTles } from "../../../satdb/tles";
+import { parseCosparIdFromTle } from "../../parseCosparIdFromTle";
 import { searchTextAtom, selectedSatelliteIdAtom } from "../../urlAtom";
 import styles from "./Search.module.css";
 import { SearchInput } from "./SearchInput";
-
-function parseTleCosparId(line1: string) {
-  const yy = parseInt(line1.slice(9, 11));
-  const launchNumberOfYear = line1.slice(11, 14);
-  const pieceOfLaunch = line1.slice(14, 17).trim();
-
-  // The first satellite was launched in 1957. We can use this to disambiguate
-  // two digit years from TLE data until 2057.
-  const launchYear = (yy < 57 ? 2000 : 1900) + yy;
-
-  return `${launchYear}-${launchNumberOfYear}${pieceOfLaunch}`;
-}
 
 export const searchResultsAtom = unwrap(
   atom(async (get) =>
@@ -24,7 +13,7 @@ export const searchResultsAtom = unwrap(
       (await getTles()).map((tle) => ({
         ...tle,
         noradId: tle.line1.slice(2, 7),
-        cosparId: parseTleCosparId(tle.line1),
+        cosparId: parseCosparIdFromTle(tle.line1),
       })),
       get(searchTextAtom),
       {
