@@ -8,8 +8,14 @@ import {
 import { Store } from "./jotai-types";
 import { SatellitePositions } from "./SatellitePositions/SatellitePositions";
 import { searchResultsAtom } from "./UiOverlay/Search/Search";
+import {
+  highlightedSatelliteIdsAtom,
+  selectedSatelliteIdAtom,
+} from "./urlAtom";
 
-const inResultsColor = new Color("#ff0000").toArray();
+const selectedColor = new Color("#0f0").toArray();
+const highlightedColor = new Color("#ff0").toArray();
+const inResultsColor = new Color("#f00").toArray();
 const notInResultsColor = new Color("#222").toArray();
 
 export function makeSatellitePoints(
@@ -39,11 +45,22 @@ export function makeSatellitePoints(
   points.geometry.setDrawRange(0, satellitePositions.indexToId.size);
 
   const updateColors = () => {
+    const selectedId = store.get(selectedSatelliteIdAtom);
+    const highlightedSatelliteIds = new Set(
+      store.get(highlightedSatelliteIdsAtom)
+    );
+
     const results = new Set(store.get(searchResultsAtom).map((x) => x.noradId));
 
     for (const [index, id] of satellitePositions.indexToId.entries()) {
       points.geometry.attributes.color.array.set(
-        results.has(id) ? inResultsColor : notInResultsColor,
+        id === selectedId
+          ? selectedColor
+          : highlightedSatelliteIds.has(id)
+            ? highlightedColor
+            : results.has(id)
+              ? inResultsColor
+              : notInResultsColor,
         index * 3
       );
     }
@@ -55,6 +72,14 @@ export function makeSatellitePoints(
     searchResultsAtom,
     updateColors
   );
+  const unsubscribeSelectedSatelliteIdAtom = store.sub(
+    selectedSatelliteIdAtom,
+    updateColors
+  );
+  const unsubscribeHighlightedSatelliteIdsAtom = store.sub(
+    highlightedSatelliteIdsAtom,
+    updateColors
+  );
 
   const dependencyRef = {
     needsUpdate: false,
@@ -64,6 +89,8 @@ export function makeSatellitePoints(
 
   const dispose = () => {
     unsubscribeSearchResultsAtom();
+    unsubscribeSelectedSatelliteIdAtom();
+    unsubscribeHighlightedSatelliteIdsAtom();
     satellitePositions.dependents.delete(dependencyRef);
     points.geometry.dispose();
     points.material.dispose();
