@@ -8,6 +8,7 @@ export function SearchInput() {
     <div>
       <input
         type="search"
+        placeholder="Search satellites"
         value={searchText}
         onChange={(event) => {
           setSearchText(event.currentTarget.value);
