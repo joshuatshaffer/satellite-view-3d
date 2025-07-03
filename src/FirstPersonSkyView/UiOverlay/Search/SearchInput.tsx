@@ -1,6 +1,5 @@
-import { atom, useAtom } from "jotai";
-
-export const searchTextAtom = atom("");
+import { useAtom } from "jotai";
+import { searchTextAtom } from "../../urlAtom";
 
 export function SearchInput() {
   const [searchText, setSearchText] = useAtom(searchTextAtom);

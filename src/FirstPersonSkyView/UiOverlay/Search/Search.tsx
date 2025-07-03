@@ -2,9 +2,9 @@ import { atom, useAtom, useAtomValue } from "jotai";
 import { unwrap } from "jotai/utils";
 import { matchSorter } from "match-sorter";
 import { getTles } from "../../../satdb/tles";
-import { selectedSatelliteIdAtom } from "../../urlAtom";
+import { searchTextAtom, selectedSatelliteIdAtom } from "../../urlAtom";
 import styles from "./Search.module.css";
-import { SearchInput, searchTextAtom } from "./SearchInput";
+import { SearchInput } from "./SearchInput";
 
 export const searchResultsAtom = unwrap(
   atom(async (get) =>
