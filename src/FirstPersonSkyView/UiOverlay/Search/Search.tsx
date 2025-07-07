@@ -1,27 +1,23 @@
 import { atom, useAtom, useAtomValue } from "jotai";
-import { unwrap } from "jotai/utils";
 import { matchSorter } from "match-sorter";
-import { getTles } from "../../../satdb/tles";
+import { tlesAtom } from "../../../satdb/tles";
 import { parseCosparIdFromTle } from "../../parseCosparIdFromTle";
 import { searchTextAtom, selectedSatelliteIdAtom } from "../../urlAtom";
 import styles from "./Search.module.css";
 import { SearchInput } from "./SearchInput";
 
-export const searchResultsAtom = unwrap(
-  atom(async (get) =>
-    matchSorter(
-      (await getTles()).map((tle) => ({
-        ...tle,
-        noradId: tle.line1.slice(2, 7),
-        cosparId: parseCosparIdFromTle(tle.line1),
-      })),
-      get(searchTextAtom),
-      {
-        keys: ["objectName", "noradId", "cosparId"],
-      }
-    )
-  ),
-  (prev) => prev ?? []
+export const searchResultsAtom = atom((get) =>
+  matchSorter(
+    get(tlesAtom).map((tle) => ({
+      ...tle,
+      noradId: tle.line1.slice(2, 7),
+      cosparId: parseCosparIdFromTle(tle.line1),
+    })),
+    get(searchTextAtom),
+    {
+      keys: ["objectName", "noradId", "cosparId"],
+    }
+  )
 );
 
 function SearchResultList() {

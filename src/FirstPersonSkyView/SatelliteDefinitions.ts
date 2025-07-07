@@ -1,5 +1,7 @@
 import { atom } from "jotai";
 import * as satellite from "satellite.js";
+import { NoradId } from "../satdb/db";
+import { tlesAtom } from "../satdb/tles";
 
 export type Tle = [line1: string, line2: string];
 
@@ -8,29 +10,21 @@ export interface SatelliteDefinition {
   tle: Tle;
 }
 
-export const satelliteDefinitionsAtom = atom<{
-  definitions: ReadonlyMap<string, SatelliteDefinition>;
-  records: ReadonlyMap<string, satellite.SatRec>;
-}>({ definitions: new Map(), records: new Map() });
+export const satelliteDefinitionsAtom = atom((get) => {
+  const definitions = new Map<NoradId, SatelliteDefinition>();
+  const records = new Map<NoradId, satellite.SatRec>();
 
-export const setSatellitesAtom = atom(
-  null,
-  (_get, set, newDefinitions: Iterable<SatelliteDefinition>) => {
-    const definitions = new Map<string, SatelliteDefinition>();
-    const records = new Map<string, satellite.SatRec>();
+  for (const tle of get(tlesAtom)) {
+    const record = satellite.twoline2satrec(tle.line1, tle.line2);
 
-    for (const definition of newDefinitions) {
-      const record = satellite.twoline2satrec(
-        definition.tle[0],
-        definition.tle[1]
-      );
+    const id = record.satnum;
 
-      const id = record.satnum;
-
-      definitions.set(id, definition);
-      records.set(id, record);
-    }
-
-    set(satelliteDefinitionsAtom, { definitions, records });
+    definitions.set(id, {
+      displayName: tle.objectName,
+      tle: [tle.line1, tle.line2],
+    });
+    records.set(id, record);
   }
-);
+
+  return { definitions, records };
+});

@@ -1,7 +1,6 @@
 import { PerspectiveCamera, Scene, WebGLRenderer } from "three";
 import Stats from "three/addons/libs/stats.module.js";
 import { CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
-import { getTles } from "../satdb/tles";
 import { clamp } from "./clamp";
 import { makeDeviceOrientationControls } from "./DeviceOrientationControls";
 import { makeGrid } from "./grid/grid";
@@ -10,7 +9,6 @@ import { Store } from "./jotai-types";
 import { makeHighlightedSatelliteLabels } from "./makeHighlightedSatelliteLabels";
 import { degToRad } from "./rotations";
 import { satelliteAtPointer } from "./satelliteAtPointer";
-import { SatelliteDefinition, setSatellitesAtom } from "./SatelliteDefinitions";
 import { makeSatelliteLabel } from "./SatelliteLabel/makeSatelliteLabel";
 import { makeSatelliteOffscreenPointer } from "./SatelliteLabel/makeSatelliteOffscreenPointer";
 import { makeSatellitePoints } from "./SatellitePoints";
@@ -193,18 +191,6 @@ export function startSkyViewRenderer({
     scene.add(grid.gridRoot);
     lifeCycleCallbacks.push(grid);
   }
-
-  getTles().then((tles) => {
-    store.set(
-      setSatellitesAtom,
-      tles.map(
-        (tle): SatelliteDefinition => ({
-          displayName: tle.objectName,
-          tle: [tle.line1, tle.line2],
-        })
-      )
-    );
-  });
 
   const satellitePositions = makeSatellitePositions(store);
   lifeCycleCallbacks.push(satellitePositions);

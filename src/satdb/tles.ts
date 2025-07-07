@@ -1,4 +1,5 @@
-import { getDb, Tle } from "./db";
+import { atom } from "jotai";
+import { getDb, Tle, withDb } from "./db";
 import { daysToMs } from "./ms";
 
 const tleUrl =
@@ -9,8 +10,8 @@ const tleUrl =
  */
 const tleMaxAgeMs = 1 * daysToMs;
 
-async function fetchTles() {
-  const response = await fetch(tleUrl);
+async function fetchTles({ signal }: { signal?: AbortSignal } = {}) {
+  const response = await fetch(tleUrl, { signal });
   const body = await response.text();
   const lines = body.split("\n");
   const tles: Tle[] = [];
@@ -45,33 +46,55 @@ async function putTles(tles: Tle[]) {
   }
 }
 
-export async function getTles(): Promise<Tle[]> {
-  const db = await getDb();
-  try {
-    // If the data is more than 2 hours old, fetch new data.
-    const lastSynced = await db.get("dataSync", "tle");
-    if (
-      lastSynced === undefined ||
-      Date.now() - lastSynced.getTime() > tleMaxAgeMs
-    ) {
-      try {
-        const tles = await fetchTles();
+export const tlesAtom = atom<Tle[]>([]);
 
-        // Do not wait for the update to complete before returning the TLEs so that
-        // the UI renders faster.
-        putTles(tles).catch((error) => {
-          console.error("Failed to save TLEs to IndexedDB", error);
-        });
+tlesAtom.onMount = (setAtom) => {
+  const abortController = new AbortController();
+  const signal = abortController.signal;
+  let nextSyncTimeout: ReturnType<typeof setTimeout> | undefined;
 
-        return tles;
-      } catch (error) {
-        console.error("Failed to fetch TLEs", error);
-        // If fetching fails, return the cached TLEs.
-      }
+  const sync = async () => {
+    try {
+      const tles = await fetchTles({ signal });
+
+      // Do not wait for the update to complete before returning the TLEs so
+      // that the UI updates faster.
+      putTles(tles).catch((error) => {
+        console.error("Failed to save TLEs to IndexedDB", error);
+      });
+
+      setAtom(tles);
+    } catch (error) {
+      console.error("Failed to fetch TLEs", error);
     }
 
-    return await db.getAll("tle");
-  } finally {
-    db.close();
-  }
-}
+    if (!signal.aborted) {
+      await scheduleNextSync();
+    }
+  };
+
+  const scheduleNextSync = async () => {
+    // When the data is more than 2 hours old, fetch new data.
+    const lastSynced = await withDb((db) => db.get("dataSync", "tle"));
+
+    const timeUntilNextSync =
+      lastSynced === undefined
+        ? 0
+        : tleMaxAgeMs - (Date.now() - lastSynced.getTime());
+
+    setTimeout(sync, Math.max(0, timeUntilNextSync));
+  };
+
+  (async () => {
+    setAtom(await withDb((db) => db.getAll("tle")));
+
+    await scheduleNextSync();
+  })();
+
+  return () => {
+    if (nextSyncTimeout !== undefined) {
+      clearTimeout(nextSyncTimeout);
+    }
+    abortController.abort();
+  };
+};

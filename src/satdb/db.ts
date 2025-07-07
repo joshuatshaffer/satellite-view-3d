@@ -29,3 +29,12 @@ export async function getDb() {
     },
   });
 }
+
+export async function withDb<T>(fn: (db: Db) => PromiseLike<T>) {
+  const db = await getDb();
+  try {
+    return await fn(db);
+  } finally {
+    db.close();
+  }
+}
