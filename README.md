@@ -14,9 +14,13 @@
   - Also uses device orientation to show a view of the sky.
   - Uses known stars to calibrate the device orientation.
   - Does not show satellites.
+- [Heavensat Web](https://1valdis.github.io/heavensat-web/)
+  - First person view
+  - Does not use device orientation.
 
 ## To Do
 
+- [ ] Upgrade to the latest version of satellite.js and use OMM instead of TLE.
 - [x] Move control panel to the right side.
 - [x] Stop labels from scrolling when the control panel scrolls.
 - [x] Zoom in/out.
