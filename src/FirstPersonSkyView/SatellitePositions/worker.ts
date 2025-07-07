@@ -57,7 +57,7 @@ function update() {
   for (const [id, record] of records) {
     const positionAndVelocity = satellite.propagate(record, nowDate);
 
-    const positionEci = positionAndVelocity.position;
+    const positionEci = positionAndVelocity?.position;
 
     if (typeof positionEci !== "object") {
       continue;
